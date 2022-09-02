@@ -102,7 +102,7 @@ output.json
 
 # IntelliJ
 *.iml
-.idea/
+.idea/*
 misc.xml
 deploymentTargetDropDown.xml
 render.experimental.xml
@@ -116,3 +116,11 @@ google-services.json
 
 # Android Profiling
 *.hprof
+
+######################
+# User configuration #
+######################
+!**/.idea/codeStyles
+!.idea/codeStyles/Project.xml
+!.idea/codeStyles/codeStyleConfig.xml
+!.idea/vcs.xml
