@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/settings_navigation"
+    app:startDestination="@id/settings_fragment">
+
+    <framework-fragment
+        android:id="@+id/settings_fragment"
+        android:name="com.sorrowblue.comicviewer.settings.SettingsFragment"
+        android:label="設定" >
+        <action
+            android:id="@+id/settings_action_settings_fragment_to_settings_auth_request_dialog"
+            app:destination="@id/settings_auth_request_dialog" />
+    </framework-fragment>
+    <dialog
+        android:id="@+id/settings_auth_request_dialog"
+        android:name="com.sorrowblue.comicviewer.settings.AuthRequestDialog"
+        android:label="AuthRequestDialog" />
+</navigation>

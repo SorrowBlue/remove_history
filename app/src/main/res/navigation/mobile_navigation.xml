@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@id/empty_fragment">
+
+    <include app:graph="@navigation/library" />
+    <include app:graph="@navigation/bookshelf" />
+    <framework-fragment
+        android:id="@+id/empty_fragment"
+        android:name="com.sorrowblue.comicviewer.EmptyFragment"
+        android:label="EmptyFragment">
+        <action
+            android:id="@+id/action_empty_to_library"
+            app:destination="@id/library_navigation"
+            app:launchSingleTop="true"
+            app:popUpTo="@id/empty_fragment"
+            app:popUpToInclusive="true" />
+    </framework-fragment>
+    <include app:graph="@navigation/settings" />
+    <action
+        android:id="@+id/action_global_settings_navigation"
+        app:destination="@id/settings_navigation"
+        app:launchSingleTop="true" />
+</navigation>
