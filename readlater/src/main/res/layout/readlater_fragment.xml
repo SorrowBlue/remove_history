@@ -11,25 +11,26 @@
     </data>
 
     <com.sorrowblue.comicviewer.framework.ui.NestedScrollCoordinatorLayout
+        android:id="@id/fragment_root"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <com.google.android.material.appbar.AppBarLayout
-            android:id="@+id/app_bar_layout"
+            android:id="@id/app_bar_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:liftOnScroll="true">
 
             <com.google.android.material.appbar.MaterialToolbar
-                android:id="@+id/toolbar"
+                android:id="@id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:menu="@menu/readlater"
-                app:title="後で見る" />
+                tools:title="後で見る" />
         </com.google.android.material.appbar.AppBarLayout>
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@id/framework_ui_recycler_view"
+            android:id="@id/recycler_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipToPadding="false"
@@ -55,10 +56,11 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:paddingHorizontal="@dimen/framework_ui_default_margin"
             app:isVisible="@{viewModel.isEmptyDataFlow}">
 
             <ImageView
-                android:id="@+id/favorite_imageview"
+                android:id="@+id/nothing_image"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:importantForAccessibility="no"
@@ -71,11 +73,13 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="後で見るには何もありません。"
+                android:text="@string/readlater_label_nothing_to_read_later"
                 android:textAppearance="?attr/textAppearanceHeadlineSmall"
-                app:layout_constraintEnd_toEndOf="@+id/favorite_imageview"
-                app:layout_constraintStart_toStartOf="@+id/favorite_imageview"
-                app:layout_constraintTop_toBottomOf="@+id/favorite_imageview" />
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/nothing_image"
+                app:layout_constraintVertical_bias="0.0" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </com.sorrowblue.comicviewer.framework.ui.NestedScrollCoordinatorLayout>
 </layout>

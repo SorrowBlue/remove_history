@@ -19,6 +19,7 @@ android {
 dependencies {
     implementation(projects.framework.ui)
     implementation(projects.domain)
+    implementation(projects.file)
     implementation(projects.book)
     implementation(projects.folder.display)
 

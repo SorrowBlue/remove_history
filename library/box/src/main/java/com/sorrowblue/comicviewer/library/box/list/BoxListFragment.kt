@@ -62,7 +62,7 @@ internal class BoxListFragment :
             }
         }
 
-        binding.frameworkUiRecyclerView.applyInsetter {
+        binding.recyclerView.applyInsetter {
             type(systemBars = true, displayCutout = true) {
                 padding(horizontal = true, bottom = true)
             }

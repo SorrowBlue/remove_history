@@ -51,7 +51,7 @@ internal class GoogleDriveListFragment : PagingFragment<File>(R.layout.library_f
         viewModel.googleSignInAccount.onEach {
             binding.profilePhoto.setSrcCompat(it?.photoUrl)
             binding.displayName.text = it?.displayName
-            binding.frameworkUiRecyclerView.isVisible = it != null
+            binding.recyclerView.isVisible = it != null
         }.launchInWithLifecycle()
 
         viewModel.isRefreshingFlow.onEach {
@@ -66,7 +66,7 @@ internal class GoogleDriveListFragment : PagingFragment<File>(R.layout.library_f
             }
         }
 
-        binding.frameworkUiRecyclerView.applyInsetter {
+        binding.recyclerView.applyInsetter {
             type(systemBars = true, displayCutout = true) {
                 padding(horizontal = true, bottom = true)
             }

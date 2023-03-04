@@ -28,7 +28,6 @@ internal class BookshelfListFragment :
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         binding.viewModel = viewModel
 
         binding.toolbar.setupWithNavController()
@@ -40,7 +39,7 @@ internal class BookshelfListFragment :
             }
         }
 
-        binding.frameworkUiRecyclerView.applyInsetter {
+        binding.recyclerView.applyInsetter {
             type(systemBars = true, displayCutout = true) {
                 padding(horizontal = true, bottom = true)
             }

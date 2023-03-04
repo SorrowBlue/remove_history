@@ -17,6 +17,7 @@ import com.sorrowblue.comicviewer.domain.entity.file.Book
 import com.sorrowblue.comicviewer.domain.entity.file.File
 import com.sorrowblue.comicviewer.domain.entity.file.Folder
 import com.sorrowblue.comicviewer.favorite.databinding.FavoriteFragmentBinding
+import com.sorrowblue.comicviewer.file.info.FileInfoNavigation
 import com.sorrowblue.comicviewer.folder.FolderAdapter
 import com.sorrowblue.comicviewer.folder.FolderFragmentArgs
 import com.sorrowblue.comicviewer.framework.ui.flow.launchInWithLifecycle
@@ -42,7 +43,7 @@ internal class FavoriteFragment : PagingFragment<File>(R.layout.favorite_fragmen
     override val viewModel: FavoriteViewModel by viewModels()
     override val adapter
         get() = FolderAdapter(
-            runBlocking { viewModel.folderDisplaySettingsFlow.first().display },
+            runBlocking { viewModel.displayFlow.first() },
             { file, transitionName, extras ->
                 when (file) {
                     is Book -> navigate(
@@ -59,7 +60,7 @@ internal class FavoriteFragment : PagingFragment<File>(R.layout.favorite_fragmen
                     )
                 }
             },
-            { navigate("comicviewer://comicviewer.sorrowblue.com/file_info?server_id=${it.bookshelfId.value}&path=${it.path.encodeBase64()}".toUri()) }
+            { navigate(FileInfoNavigation.getDeeplink(it)) }
         )
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -75,20 +76,18 @@ internal class FavoriteFragment : PagingFragment<File>(R.layout.favorite_fragmen
                 margin(top = true)
             }
         }
-        binding.frameworkUiRecyclerView.applyInsetter {
+        binding.recyclerView.applyInsetter {
             type(systemBars = true, displayCutout = true) {
                 padding(horizontal = true, bottom = true)
             }
         }
     }
 
-    override fun onCreateAdapter(adapter: PagingDataAdapter<File, *>) {
-        super.onCreateAdapter(adapter)
-        check(adapter is FolderAdapter)
-        viewModel.folderDisplaySettingsFlow.onEach { adapter.display = it.display }
-            .launchInWithLifecycle()
-
-        viewModel.spanCountFlow.onEach(binding.frameworkUiRecyclerView::setSpanCount).launchInWithLifecycle()
+    override fun onCreateAdapter(pagingDataAdapter: PagingDataAdapter<File, *>) {
+        super.onCreateAdapter(pagingDataAdapter)
+        check(pagingDataAdapter is FolderAdapter)
+        viewModel.displayFlow.onEach(pagingDataAdapter::setDisplay).launchInWithLifecycle()
+        viewModel.spanCountFlow.onEach(binding.recyclerView::setSpanCount).launchInWithLifecycle()
     }
 
     override fun onMenuItemClick(item: MenuItem): Boolean {

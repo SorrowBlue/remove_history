@@ -18,6 +18,7 @@ import com.sorrowblue.comicviewer.framework.ui.navigation.stateIn
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
@@ -40,14 +41,14 @@ internal class FavoriteViewModel @Inject constructor(
     private val favoriteFlow = getFavoriteUseCase.execute(GetFavoriteUseCase.Request(favoriteId))
         .mapNotNull { it.dataOrNull }
 
-    val folderDisplaySettingsFlow = manageFolderDisplaySettingsUseCase.settings
-
     override val pagingDataFlow = pagingFavoriteFileUseCase
         .execute(PagingFavoriteFileUseCase.Request(PagingConfig(20), favoriteId))
         .cachedIn(viewModelScope)
 
-    val spanCountFlow = folderDisplaySettingsFlow.map { it.rawSpanCount }
-        .stateIn { runBlocking { folderDisplaySettingsFlow.first().rawSpanCount } }
+    val displayFlow =
+        manageFolderDisplaySettingsUseCase.settings.map { it.display }.distinctUntilChanged()
+    val spanCountFlow =
+        manageFolderDisplaySettingsUseCase.settings.map { it.rawSpanCount }.distinctUntilChanged()
 
     val titleFlow = favoriteFlow.map { it.name }.stateIn { "" }
     val countFlow = favoriteFlow.map { it.count }.stateIn { 0 }

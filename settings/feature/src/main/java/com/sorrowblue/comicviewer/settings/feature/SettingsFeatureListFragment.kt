@@ -37,7 +37,7 @@ internal class SettingsFeatureListFragment :
             }
         }
 
-        binding.frameworkUiRecyclerView.applyInsetter {
+        binding.recyclerView.applyInsetter {
             type(systemBars = true, displayCutout = true) {
                 padding(horizontal = true, bottom = true)
             }
@@ -69,7 +69,7 @@ internal class SettingsFeatureListFragment :
                 adapter.submitList(it)
             }
         }
-        binding.frameworkUiRecyclerView.adapter = adapter
+        binding.recyclerView.adapter = adapter
     }
 
     override fun onStateUpdate(state: SplitInstallSessionState) {

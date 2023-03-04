@@ -21,6 +21,7 @@ import com.sorrowblue.comicviewer.framework.ui.navigation.stateIn
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
@@ -65,14 +66,11 @@ internal class FolderViewModel @Inject constructor(
     }.cachedIn(viewModelScope)
     var query = ""
 
-    val folderDisplaySettingsFlow = manageFolderDisplaySettingsUseCase.settings
+    val displayFlow =
+        manageFolderDisplaySettingsUseCase.settings.map { it.display }.distinctUntilChanged()
+    val spanCountFlow =
+        manageFolderDisplaySettingsUseCase.settings.map { it.rawSpanCount }.distinctUntilChanged()
 
-    val spanCountFlow = folderDisplaySettingsFlow.map {
-        when (it.display) {
-            FolderDisplaySettings.Display.GRID -> it.spanCount
-            FolderDisplaySettings.Display.LIST -> 1
-        }
-    }
     val pagingQueryDataFlow = serverFolderFlow.flatMapLatest {
         pagingQueryFileUseCase.execute(
             PagingQueryFileUseCase.Request(PagingConfig(100), it.bookshelf) {

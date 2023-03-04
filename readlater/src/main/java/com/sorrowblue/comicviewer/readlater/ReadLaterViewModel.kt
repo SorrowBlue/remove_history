@@ -4,16 +4,13 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
 import com.sorrowblue.comicviewer.domain.entity.file.File
-import com.sorrowblue.comicviewer.domain.entity.settings.FolderDisplaySettings
 import com.sorrowblue.comicviewer.domain.usecase.paging.PagingReadLaterFileUseCase
 import com.sorrowblue.comicviewer.domain.usecase.settings.ManageFolderDisplaySettingsUseCase
 import com.sorrowblue.comicviewer.framework.ui.fragment.PagingViewModel
-import com.sorrowblue.comicviewer.framework.ui.navigation.stateIn
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.runBlocking
 
 @HiltViewModel
 internal class ReadLaterViewModel @Inject constructor(
@@ -26,13 +23,8 @@ internal class ReadLaterViewModel @Inject constructor(
         .execute(PagingReadLaterFileUseCase.Request(PagingConfig(20)))
         .cachedIn(viewModelScope)
 
-    val folderDisplaySettingsFlow = manageFolderDisplaySettingsUseCase.settings
-    val spanCountFlow = folderDisplaySettingsFlow.map { it.rawSpanCount }
-        .stateIn { runBlocking { folderDisplaySettingsFlow.first().rawSpanCount } }
-
-    private val FolderDisplaySettings.rawSpanCount
-        get() = when (display) {
-            FolderDisplaySettings.Display.GRID -> spanCount
-            FolderDisplaySettings.Display.LIST -> 1
-        }
+    val displayFlow =
+        manageFolderDisplaySettingsUseCase.settings.map { it.display }.distinctUntilChanged()
+    val spanCountFlow =
+        manageFolderDisplaySettingsUseCase.settings.map { it.rawSpanCount }.distinctUntilChanged()
 }

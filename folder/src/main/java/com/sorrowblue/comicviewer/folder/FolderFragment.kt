@@ -35,6 +35,7 @@ import com.sorrowblue.comicviewer.domain.entity.file.File
 import com.sorrowblue.comicviewer.domain.entity.file.Folder
 import com.sorrowblue.comicviewer.domain.entity.settings.FolderDisplaySettings
 import com.sorrowblue.comicviewer.domain.model.ScanType
+import com.sorrowblue.comicviewer.file.info.FileInfoNavigation
 import com.sorrowblue.comicviewer.folder.databinding.FolderFragmentBinding
 import com.sorrowblue.comicviewer.framework.ui.flow.attachAdapter
 import com.sorrowblue.comicviewer.framework.ui.flow.launchInWithLifecycle
@@ -61,18 +62,16 @@ internal class FolderFragment : PagingFragment<File>(R.layout.folder_fragment),
 
     private val binding: FolderFragmentBinding by viewBinding()
     private val commonViewModel: CommonViewModel by activityViewModels()
-
     override val viewModel: FolderViewModel by viewModels()
+
     override val adapter
         get() = FolderAdapter(
-            runBlocking { viewModel.folderDisplaySettingsFlow.first().display },
+            runBlocking { viewModel.displayFlow.first() },
             { file, transitionName, extras ->
                 when (file) {
                     is Book -> navigate(
-                        FolderFragmentDirections.actionFolderToBook(
-                            file,
-                            transitionName
-                        ), extras
+                        FolderFragmentDirections.actionFolderToBook(file, transitionName),
+                        extras
                     )
 
                     is Folder -> navigate(
@@ -80,22 +79,22 @@ internal class FolderFragment : PagingFragment<File>(R.layout.folder_fragment),
                             file.bookshelfId.value,
                             file.path.encodeBase64(),
                             transitionName
-                        ), extras
+                        ),
+                        extras
                     )
                 }
             },
-            { navigate("comicviewer://comicviewer.sorrowblue.com/file_info?server_id=${it.bookshelfId.value}&path=${it.path.encodeBase64()}".toUri()) }
+            { navigate(FileInfoNavigation.getDeeplink(it)) }
         )
 
-    override fun onCreateAdapter(adapter: PagingDataAdapter<File, *>) {
-        super.onCreateAdapter(adapter)
-        check(adapter is FolderAdapter)
-        viewModel.folderDisplaySettingsFlow.onEach { adapter.display = it.display }
-            .launchInWithLifecycle()
-        viewModel.spanCountFlow.onEach(binding.frameworkUiRecyclerView::setSpanCount)
-            .launchInWithLifecycle()
+    override fun onCreateAdapter(pagingDataAdapter: PagingDataAdapter<File, *>) {
+        super.onCreateAdapter(pagingDataAdapter)
+        check(pagingDataAdapter is FolderAdapter)
+        viewModel.displayFlow.onEach(pagingDataAdapter::setDisplay).launchInWithLifecycle()
+        viewModel.spanCountFlow.onEach(binding.recyclerView::setSpanCount).launchInWithLifecycle()
+
         viewLifecycleOwner.lifecycleScope.launch {
-            adapter.loadStateFlow.mapNotNull { it.refresh as? LoadState.Error }
+            pagingDataAdapter.loadStateFlow.mapNotNull { it.refresh as? LoadState.Error }
                 .distinctUntilChanged()
                 .collectLatest {
                     if (it.error is PagingException) {
@@ -112,9 +111,9 @@ internal class FolderFragment : PagingFragment<File>(R.layout.folder_fragment),
             viewModel.position = -1
             viewLifecycleOwner.lifecycleScope.launch {
                 repeatOnLifecycle(Lifecycle.State.CREATED) {
-                    adapter.loadStateFlow.distinctUntilChangedBy { it.refresh }
-                        .first { it.refresh is LoadState.NotLoading && adapter.itemCount > 0 }
-                    binding.frameworkUiRecyclerView.scrollToPosition(position)
+                    pagingDataAdapter.loadStateFlow.distinctUntilChangedBy { it.refresh }
+                        .first { it.refresh is LoadState.NotLoading && pagingDataAdapter.itemCount > 0 }
+                    binding.recyclerView.scrollToPosition(position)
                     commonViewModel.isRestored.emit(true)
                 }
             }
@@ -138,7 +137,7 @@ internal class FolderFragment : PagingFragment<File>(R.layout.folder_fragment),
                 margin(top = true)
             }
         }
-        binding.frameworkUiRecyclerView.applyInsetter {
+        binding.recyclerView.applyInsetter {
             type(systemBars = true, displayCutout = true) {
                 padding(horizontal = true, bottom = true)
             }
@@ -213,7 +212,7 @@ internal class FolderFragment : PagingFragment<File>(R.layout.folder_fragment),
                     )
                 }
             },
-            { navigate("comicviewer://comicviewer.sorrowblue.com/file_info?server_id=${it.bookshelfId.value}&path=${it.path.encodeBase64()}".toUri()) }
+            { navigate(FileInfoNavigation.getDeeplink(it)) }
         )
         viewModel.pagingQueryDataFlow.attachAdapter(adapter)
         binding.searchRecyclerView.adapter = adapter
@@ -240,7 +239,7 @@ internal class FolderFragment : PagingFragment<File>(R.layout.folder_fragment),
     private fun show() {
         MaterialAlertDialogBuilder(requireContext()).setTitle("権限リクエスト")
             .setMessage("スキャン状況を表示するため通知を許可してください").setPositiveButton("許可する") { _, _ ->
-                kotlin.runCatching {
+                runCatching {
                     startActivity(
                         Intent(
                             Settings.ACTION_APPLICATION_DETAILS_SETTINGS,

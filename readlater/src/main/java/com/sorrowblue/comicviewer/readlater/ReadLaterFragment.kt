@@ -1,19 +1,15 @@
 package com.sorrowblue.comicviewer.readlater
 
 import android.os.Bundle
-import android.view.MenuItem
 import android.view.View
-import androidx.appcompat.widget.Toolbar
-import androidx.core.net.toUri
 import androidx.fragment.app.viewModels
 import androidx.navigation.NavDirections
-import androidx.navigation.fragment.findNavController
-import androidx.navigation.ui.onNavDestinationSelected
 import androidx.paging.PagingDataAdapter
 import com.sorrowblue.comicviewer.book.BookFragmentArgs
 import com.sorrowblue.comicviewer.domain.entity.file.Book
 import com.sorrowblue.comicviewer.domain.entity.file.File
 import com.sorrowblue.comicviewer.domain.entity.file.Folder
+import com.sorrowblue.comicviewer.file.info.FileInfoNavigation
 import com.sorrowblue.comicviewer.folder.FolderAdapter
 import com.sorrowblue.comicviewer.folder.FolderFragmentArgs
 import com.sorrowblue.comicviewer.framework.ui.flow.launchInWithLifecycle
@@ -30,15 +26,14 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
 
 @AndroidEntryPoint
-internal class ReadLaterFragment : PagingFragment<File>(R.layout.readlater_fragment),
-    Toolbar.OnMenuItemClickListener {
+internal class ReadLaterFragment : PagingFragment<File>(R.layout.readlater_fragment) {
 
     private val binding: ReadlaterFragmentBinding by viewBinding()
 
     override val viewModel: ReadLaterViewModel by viewModels()
     override val adapter: PagingDataAdapter<File, *>
         get() = FolderAdapter(
-            runBlocking { viewModel.folderDisplaySettingsFlow.first().display },
+            runBlocking { viewModel.displayFlow.first() },
             { file, transitionName, extras ->
                 when (file) {
                     is Book -> navigate(
@@ -55,7 +50,7 @@ internal class ReadLaterFragment : PagingFragment<File>(R.layout.readlater_fragm
                     )
                 }
             },
-            { navigate("comicviewer://comicviewer.sorrowblue.com/file_info?server_id=${it.bookshelfId.value}&path=${it.path.encodeBase64()}".toUri()) }
+            { navigate(FileInfoNavigation.getDeeplink(it)) }
         )
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -64,33 +59,19 @@ internal class ReadLaterFragment : PagingFragment<File>(R.layout.readlater_fragm
         binding.viewModel = viewModel
 
         binding.toolbar.setupWithNavController()
-        binding.toolbar.setOnMenuItemClickListener(this)
         binding.toolbar.applyInsetter {
             type(systemBars = true, displayCutout = true) {
                 padding(horizontal = true)
                 margin(top = true)
             }
         }
-
-        binding.frameworkUiRecyclerView.applyInsetter {
-            type(systemBars = true, displayCutout = true) {
-                padding(horizontal = true, bottom = true)
-            }
-        }
     }
 
-    override fun onCreateAdapter(adapter: PagingDataAdapter<File, *>) {
-        super.onCreateAdapter(adapter)
-        check(adapter is FolderAdapter)
-        viewModel.folderDisplaySettingsFlow.onEach { adapter.display = it.display }
-            .launchInWithLifecycle()
-        viewModel.spanCountFlow.onEach(binding.frameworkUiRecyclerView::setSpanCount).launchInWithLifecycle()
-    }
-
-    override fun onMenuItemClick(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            else -> item.onNavDestinationSelected(findNavController())
-        }
+    override fun onCreateAdapter(pagingDataAdapter: PagingDataAdapter<File, *>) {
+        super.onCreateAdapter(pagingDataAdapter)
+        check(pagingDataAdapter is FolderAdapter)
+        viewModel.displayFlow.onEach(pagingDataAdapter::setDisplay).launchInWithLifecycle()
+        viewModel.spanCountFlow.onEach(binding.recyclerView::setSpanCount).launchInWithLifecycle()
     }
 
     private fun ReadLaterFragmentDirections.Companion.actionReadlaterToBook(

@@ -60,8 +60,7 @@ abstract class PagingAndroidViewModel<T : Any>(application: Application) :
 abstract class PagingFragment<T : Any>(contentLayoutId: Int) : FrameworkFragment(contentLayoutId) {
 
     protected abstract val viewModel: SupportPaging<T>
-
-    private val recyclerView: RecyclerView get() = requireView().requireViewById<RecyclerView>(R.id.framework_ui_recycler_view)
+    private val recyclerView: RecyclerView get() = requireView().requireViewById(R.id.recycler_view)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -107,28 +106,30 @@ abstract class PagingFragment<T : Any>(contentLayoutId: Int) : FrameworkFragment
         onCreateAdapter(adapter)
     }
 
-    protected open fun onCreateAdapter(adapter: PagingDataAdapter<T, *>) {
-        recyclerView.adapter = adapter
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.pagingDataFlow.collectLatest {
-                adapter.submitDataWithLifecycle(it)
-            }
-        }
-        recyclerView.doOnPreDraw {
-            if (viewModel.isInitialize) {
-                viewLifecycleOwner.lifecycleScope.launch {
-                    delay(500)
+    protected open fun onCreateAdapter(pagingDataAdapter: PagingDataAdapter<T, *>) {
+        recyclerView.apply {
+            adapter = pagingDataAdapter
+            doOnPreDraw {
+                if (viewModel.isInitialize) {
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        delay(500)
+                        startPostponedEnterTransition()
+                    }
+                } else {
+                    viewModel.isInitialize = true
                     startPostponedEnterTransition()
                 }
-            } else {
-                viewModel.isInitialize = true
-                startPostponedEnterTransition()
             }
         }
-        adapter.loadStateFlow.map { it.refresh }.distinctUntilChanged()
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.pagingDataFlow.collectLatest {
+                pagingDataAdapter.submitDataWithLifecycle(it)
+            }
+        }
+        pagingDataAdapter.loadStateFlow.map { it.refresh }.distinctUntilChanged()
             .onEach { viewModel.isRefreshingFlow.value = it is LoadState.Loading }
             .launchInWithLifecycle()
-        adapter.loadStateFlow.map { it.refresh is LoadState.NotLoading && it.append.endOfPaginationReached && adapter.itemCount == 0 }
+        pagingDataAdapter.loadStateFlow.map { it.refresh is LoadState.NotLoading && it.append.endOfPaginationReached && pagingDataAdapter.itemCount == 0 }
             .distinctUntilChanged().onEach {
                 viewModel.isEmptyDataFlow.value = it
             }.launchInWithLifecycle()

@@ -10,7 +10,7 @@ import com.sorrowblue.comicviewer.domain.entity.settings.FolderDisplaySettings
 import com.sorrowblue.comicviewer.folder.viewholder.FolderViewHolder
 
 class FolderAdapter(
-    display: FolderDisplaySettings.Display,
+    private var display: FolderDisplaySettings.Display,
     private val onClick: (File, String, FragmentNavigator.Extras) -> Unit,
     private val onLongClick: (File) -> Unit
 ) : PagingDataAdapter<File, FolderViewHolder<out ViewBinding>>(
@@ -21,11 +21,9 @@ class FolderAdapter(
     }
 ) {
 
-    var display = display
-        set(value) {
-            field = value
-            refresh()
-        }
+    fun setDisplay(display: FolderDisplaySettings.Display) {
+        this.display = display
+    }
 
     override fun getItemViewType(position: Int) = display.ordinal
 

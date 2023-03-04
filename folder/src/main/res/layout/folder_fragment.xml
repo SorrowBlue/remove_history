@@ -17,13 +17,13 @@
         android:transitionName="@{viewModel.transitionName}">
 
         <com.google.android.material.appbar.AppBarLayout
-            android:id="@+id/app_bar_layout"
+            android:id="@id/app_bar_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:liftOnScroll="true">
 
             <com.google.android.material.appbar.MaterialToolbar
-                android:id="@+id/toolbar"
+                android:id="@id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:menu="@menu/folder"
@@ -57,7 +57,7 @@
         </com.google.android.material.search.SearchView>
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@id/framework_ui_recycler_view"
+            android:id="@id/recycler_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipToPadding="false"
