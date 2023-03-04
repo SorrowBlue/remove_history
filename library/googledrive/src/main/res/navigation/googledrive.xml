@@ -7,7 +7,7 @@
         android:id="@+id/googledrive_list_fragment"
         android:name="com.sorrowblue.comicviewer.library.googledrive.list.GoogleDriveListFragment"
         android:label="Google ドライブ"
-        tools:layout="@layout/googledrive_item_list">
+        tools:layout="@layout/library_item_list">
         <argument
             android:name="parent"
             app:argType="string"
@@ -31,7 +31,7 @@
         android:id="@+id/googledrive_signin_fragment"
         android:name="com.sorrowblue.comicviewer.library.googledrive.signin.GoogleDriveSignInFragment"
         android:label="Google ドライブ"
-        tools:layout="@layout/googledrive_fragment_signin">
+        tools:layout="@layout/library_fragment_signin">
         <action
             android:id="@+id/action_googledrive_signin_to_googledrive_list"
             app:destination="@id/googledrive_list_fragment"

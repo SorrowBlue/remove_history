@@ -26,7 +26,7 @@ internal class DeviceAuthRequestDialog : DialogFragment() {
     private val resultLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             val biometricManager = BiometricManager.from(requireContext())
-            when (biometricManager.canAuthenticate(BiometricUtil.authenticators)) {
+            when (biometricManager.canAuthenticateWeak()) {
                 BiometricManager.BIOMETRIC_SUCCESS -> {
                     viewModel.updateUseBiometrics(true)
                     commonViewModel.snackbarMessage.tryEmit("生体認証を有効にしました。")

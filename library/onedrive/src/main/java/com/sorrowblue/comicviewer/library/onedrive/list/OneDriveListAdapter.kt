@@ -9,7 +9,7 @@ import com.sorrowblue.comicviewer.domain.entity.file.Book
 import com.sorrowblue.comicviewer.domain.entity.file.File
 import com.sorrowblue.comicviewer.domain.entity.file.Folder
 import com.sorrowblue.comicviewer.framework.ui.recyclerview.ViewBindingViewHolder
-import com.sorrowblue.comicviewer.library.databinding.GoogledriveItemListBinding
+import com.sorrowblue.comicviewer.library.databinding.LibraryItemListBinding
 
 internal class OneDriveListAdapter(private val download: (Book) -> Unit) :
     PagingDataAdapter<File, OneDriveListAdapter.ViewHolder>(
@@ -32,8 +32,8 @@ internal class OneDriveListAdapter(private val download: (Book) -> Unit) :
     }
 
     inner class ViewHolder(parent: ViewGroup) :
-        ViewBindingViewHolder<GoogledriveItemListBinding>(
-            parent, GoogledriveItemListBinding::inflate
+        ViewBindingViewHolder<LibraryItemListBinding>(
+            parent, LibraryItemListBinding::inflate
         ) {
         fun bind(file: File) {
             binding.icon.load(file.params["iconLink"])

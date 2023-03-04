@@ -3,15 +3,4 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <application>
-        <provider
-            android:name="androidx.startup.InitializationProvider"
-            android:authorities="${applicationId}.androidx-startup"
-            android:exported="false"
-            tools:node="merge">
-            <meta-data
-                android:name="com.sorrowblue.comicviewer.data.coil.CoilInitializer"
-                android:value="androidx.startup" />
-        </provider>
-    </application>
 </manifest>

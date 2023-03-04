@@ -16,15 +16,15 @@ import com.sorrowblue.comicviewer.framework.ui.fragment.type
 import com.sorrowblue.comicviewer.framework.ui.navigation.SupportSafeArgs
 import com.sorrowblue.comicviewer.framework.ui.navigation.navArgs
 import com.sorrowblue.comicviewer.library.box.data.BoxApiRepository
-import com.sorrowblue.comicviewer.library.databinding.GoogledriveFragmentSigninBinding
+import com.sorrowblue.comicviewer.library.databinding.LibraryFragmentSigninBinding
 import com.sorrowblue.jetpack.binding.viewBinding
 import dev.chrisbanes.insetter.applyInsetter
 import kotlinx.coroutines.launch
 
 internal class BoxOauth2Fragment :
-    FrameworkFragment(com.sorrowblue.comicviewer.library.R.layout.googledrive_fragment_signin) {
+    FrameworkFragment(com.sorrowblue.comicviewer.library.R.layout.library_fragment_signin) {
 
-    private val binding: GoogledriveFragmentSigninBinding by viewBinding()
+    private val binding: LibraryFragmentSigninBinding by viewBinding()
     private val viewModel: BoxOauth2ViewModel by viewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

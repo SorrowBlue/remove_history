@@ -16,13 +16,13 @@ import com.google.api.services.drive.DriveScopes
 import com.sorrowblue.comicviewer.framework.ui.fragment.FrameworkFragment
 import com.sorrowblue.comicviewer.framework.ui.fragment.type
 import com.sorrowblue.comicviewer.library.R
-import com.sorrowblue.comicviewer.library.databinding.GoogledriveFragmentSigninBinding
+import com.sorrowblue.comicviewer.library.databinding.LibraryFragmentSigninBinding
 import com.sorrowblue.jetpack.binding.viewBinding
 import dev.chrisbanes.insetter.applyInsetter
 
-internal class GoogleDriveSignInFragment : FrameworkFragment(R.layout.googledrive_fragment_signin) {
+internal class GoogleDriveSignInFragment : FrameworkFragment(R.layout.library_fragment_signin) {
 
-    private val binding: GoogledriveFragmentSigninBinding by viewBinding()
+    private val binding: LibraryFragmentSigninBinding by viewBinding()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

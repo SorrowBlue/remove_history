@@ -16,8 +16,8 @@ class LogcatInitializer : Initializer<LogcatLogger.Companion> {
         }
 
         kotlin.runCatching {
-            val initializer = Class.forName("com.sorrowblue.comicviewer.data.remote.reader.zip.SevenZipInitializer").getConstructor().newInstance()as? Initializer<Unit>
-            initializer?.create(context)
+            val initializer = Class.forName("com.sorrowblue.comicviewer.data.remote.reader.zip.SevenZipInitializer").kotlin.objectInstance
+            initializer!!::class.java.getMethod("init").invoke(initializer)
         }
 
         return LogcatLogger.Companion

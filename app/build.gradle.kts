@@ -102,10 +102,10 @@ android {
         ":library:box"
     )
 
-    lint {
-        checkReleaseBuilds = false
-        abortOnError = false
-    }
+//    lint {
+//        checkReleaseBuilds = false
+//        abortOnError = false
+//    }
 }
 
 dependencies {

@@ -23,7 +23,7 @@ import com.sorrowblue.comicviewer.domain.entity.file.File
 import com.sorrowblue.comicviewer.framework.notification.ChannelID
 import com.sorrowblue.comicviewer.framework.ui.fragment.PagingFragment
 import com.sorrowblue.comicviewer.framework.ui.fragment.type
-import com.sorrowblue.comicviewer.library.databinding.GoogledriveFragmentListBinding
+import com.sorrowblue.comicviewer.library.databinding.LibraryFragmentFileListBinding
 import com.sorrowblue.jetpack.binding.viewBinding
 import dev.chrisbanes.insetter.applyInsetter
 import kotlinx.coroutines.flow.collectLatest
@@ -31,9 +31,9 @@ import kotlinx.coroutines.launch
 import logcat.logcat
 
 internal class OneDriveListFragment :
-    PagingFragment<File>(com.sorrowblue.comicviewer.library.R.layout.googledrive_fragment_list) {
+    PagingFragment<File>(com.sorrowblue.comicviewer.library.R.layout.library_fragment_file_list) {
 
-    private val binding: GoogledriveFragmentListBinding by viewBinding()
+    private val binding: LibraryFragmentFileListBinding by viewBinding()
     override val viewModel: OneDriveListViewModel by viewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

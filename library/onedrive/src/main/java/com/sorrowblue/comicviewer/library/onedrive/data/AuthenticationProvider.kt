@@ -45,7 +45,7 @@ class AuthenticationProvider private constructor(private val appContext: Context
     suspend fun initialize() {
         if (clientApplication.value != null) return
         withContext(Dispatchers.IO) {
-            PublicClientApplication.createSingleAccountPublicClientApplication(appContext.applicationContext, R.raw.auth_config_single_account, object : IPublicClientApplication.ISingleAccountApplicationCreatedListener {
+            PublicClientApplication.createSingleAccountPublicClientApplication(appContext.applicationContext, R.raw.onedrive_auth_config_single_account, object : IPublicClientApplication.ISingleAccountApplicationCreatedListener {
                 override fun onCreated(application: ISingleAccountPublicClientApplication) {
                     logcat(LogPriority.INFO) { "Success creating MSAL application." }
                     clientApplication.value = application

@@ -18,7 +18,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.sorrowblue.comicviewer.app.databinding.FragmentAuthBinding
 import com.sorrowblue.comicviewer.domain.usecase.settings.ManageSecuritySettingsUseCase
 import com.sorrowblue.comicviewer.framework.ui.fragment.FrameworkFragment
-import com.sorrowblue.comicviewer.settings.security.BiometricUtil
+import com.sorrowblue.comicviewer.settings.security.canAuthenticateWeak
 import com.sorrowblue.jetpack.binding.viewBinding
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -87,7 +87,7 @@ internal class AuthFragment : FrameworkFragment(R.layout.fragment_auth) {
     }
 
     private fun performBiometricAuthentication() {
-        when (BiometricManager.from(requireContext()).canAuthenticate(BiometricUtil.authenticators)) {
+        when (BiometricManager.from(requireContext()).canAuthenticateWeak()) {
             BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE,
             BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED,
             BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE,
@@ -125,7 +125,7 @@ internal class AuthFragment : FrameworkFragment(R.layout.fragment_auth) {
             .setTitle("生体認証")
             .setSubtitle("確認のため、生体認証を行ってください")
             .setConfirmationRequired(false)
-            .setAllowedAuthenticators(BiometricUtil.authenticators)
+            .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_WEAK)
             .build()
         biometricPrompt.authenticate(promptInfo)
     }

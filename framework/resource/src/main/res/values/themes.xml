@@ -58,4 +58,9 @@
     <style name="Preference.CheckBoxPreference.Catalog" parent="Preference.CheckBoxPreference.Material">
         <item name="android:widgetLayout">@layout/widget_checkbox_material</item>
     </style>
+
+    <style name="ShapeAppearance.Example.PILL" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">12dp</item>
+    </style>
 </resources>

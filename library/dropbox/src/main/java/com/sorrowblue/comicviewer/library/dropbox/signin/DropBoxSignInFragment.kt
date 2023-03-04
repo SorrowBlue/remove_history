@@ -12,16 +12,16 @@ import com.dropbox.core.android.Auth
 import com.sorrowblue.comicviewer.framework.ui.fragment.CommonViewModel
 import com.sorrowblue.comicviewer.framework.ui.fragment.FrameworkFragment
 import com.sorrowblue.comicviewer.framework.ui.fragment.type
-import com.sorrowblue.comicviewer.library.databinding.GoogledriveFragmentSigninBinding
+import com.sorrowblue.comicviewer.library.databinding.LibraryFragmentSigninBinding
 import com.sorrowblue.jetpack.binding.viewBinding
 import dev.chrisbanes.insetter.applyInsetter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import logcat.logcat
 
-internal class DropBoxSignInFragment : FrameworkFragment(com.sorrowblue.comicviewer.library.R.layout.googledrive_fragment_signin) {
+internal class DropBoxSignInFragment : FrameworkFragment(com.sorrowblue.comicviewer.library.R.layout.library_fragment_signin) {
 
-    private val binding: GoogledriveFragmentSigninBinding by viewBinding()
+    private val binding: LibraryFragmentSigninBinding by viewBinding()
     private val viewModel: DropBoxSignInViewModel by viewModels()
     private val commonViewModel: CommonViewModel by activityViewModels()
 

@@ -31,5 +31,5 @@
         android:id="@+id/box_signin_fragment"
         android:name="com.sorrowblue.comicviewer.library.box.signin.BoxSignInFragment"
         android:label="Box"
-        tools:layout="@layout/googledrive_fragment_signin" />
+        tools:layout="@layout/library_fragment_signin" />
 </navigation>

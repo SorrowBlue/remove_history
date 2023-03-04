@@ -27,7 +27,7 @@ import com.sorrowblue.comicviewer.framework.ui.fragment.PagingFragment
 import com.sorrowblue.comicviewer.framework.ui.fragment.type
 import com.sorrowblue.comicviewer.framework.ui.widget.ktx.setSrcCompat
 import com.sorrowblue.comicviewer.library.R
-import com.sorrowblue.comicviewer.library.databinding.GoogledriveFragmentListBinding
+import com.sorrowblue.comicviewer.library.databinding.LibraryFragmentFileListBinding
 import com.sorrowblue.comicviewer.library.googledrive.DriveDownloadWorker
 import com.sorrowblue.jetpack.binding.viewBinding
 import dev.chrisbanes.insetter.applyInsetter
@@ -36,10 +36,9 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
+internal class GoogleDriveListFragment : PagingFragment<File>(R.layout.library_fragment_file_list) {
 
-internal class GoogleDriveListFragment : PagingFragment<File>(R.layout.googledrive_fragment_list) {
-
-    private val binding: GoogledriveFragmentListBinding by viewBinding()
+    private val binding: LibraryFragmentFileListBinding by viewBinding()
 
     override val viewModel: GoogleDriveListViewModel by viewModels()
 

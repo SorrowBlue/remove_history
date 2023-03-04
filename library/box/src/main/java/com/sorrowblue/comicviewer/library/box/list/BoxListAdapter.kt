@@ -9,7 +9,7 @@ import com.sorrowblue.comicviewer.domain.entity.file.Book
 import com.sorrowblue.comicviewer.domain.entity.file.File
 import com.sorrowblue.comicviewer.domain.entity.file.Folder
 import com.sorrowblue.comicviewer.framework.ui.recyclerview.ViewBindingViewHolder
-import com.sorrowblue.comicviewer.library.databinding.GoogledriveItemListBinding
+import com.sorrowblue.comicviewer.library.databinding.LibraryItemListBinding
 import logcat.logcat
 
 internal class BoxListAdapter(private val download: (Book) -> Unit) :
@@ -33,9 +33,9 @@ internal class BoxListAdapter(private val download: (Book) -> Unit) :
     }
 
     inner class ViewHolder(parent: ViewGroup) :
-        ViewBindingViewHolder<GoogledriveItemListBinding>(
+        ViewBindingViewHolder<LibraryItemListBinding>(
             parent,
-            GoogledriveItemListBinding::inflate
+            LibraryItemListBinding::inflate
         ) {
         fun bind(file: File) {
             logcat { file.params["thumbnail"].orEmpty() }

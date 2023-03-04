@@ -4,7 +4,8 @@
     <attr name="fabVisible" format="boolean" />
     <attr name="fabIcon" format="reference" />
     <attr name="fabLabel" format="string|reference" />
-    <declare-styleable name="FrameworkDynamicFragmentNavigator" tools:ignore="ResourceName">
+    <attr name="moduleName" format="string|reference" />
+    <declare-styleable name="FrameworkDynamicFragmentNavigator">
         <attr name="moduleName" />
         <attr name="bottomNavVisible" />
         <attr name="fabVisible" />

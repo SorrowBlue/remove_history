@@ -9,16 +9,16 @@ import androidx.navigation.ui.AppBarConfiguration
 import com.box.sdk.BoxAPIConnection
 import com.sorrowblue.comicviewer.framework.ui.fragment.FrameworkFragment
 import com.sorrowblue.comicviewer.framework.ui.fragment.type
-import com.sorrowblue.comicviewer.library.databinding.GoogledriveFragmentSigninBinding
+import com.sorrowblue.comicviewer.library.databinding.LibraryFragmentSigninBinding
 import com.sorrowblue.jetpack.binding.viewBinding
 import dev.chrisbanes.insetter.applyInsetter
 import java.net.URI
 import kotlin.random.Random
 
 internal class BoxSignInFragment :
-    FrameworkFragment(com.sorrowblue.comicviewer.library.R.layout.googledrive_fragment_signin) {
+    FrameworkFragment(com.sorrowblue.comicviewer.library.R.layout.library_fragment_signin) {
 
-    private val binding: GoogledriveFragmentSigninBinding by viewBinding()
+    private val binding: LibraryFragmentSigninBinding by viewBinding()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
