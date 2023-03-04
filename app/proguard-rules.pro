@@ -19,13 +19,7 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
-
--dontwarn aQute.bnd.annotation.Resolution
 -dontwarn aQute.bnd.annotation.spi.ServiceProvider
--dontwarn com.fasterxml.jackson.core.StreamReadCapability
--dontwarn com.fasterxml.jackson.core.io.ContentReference
--dontwarn com.fasterxml.jackson.core.util.JacksonFeature
--dontwarn com.fasterxml.jackson.core.util.JacksonFeatureSet
 -dontwarn com.google.auto.value.AutoValue
 -dontwarn com.google.crypto.tink.subtle.Ed25519Sign$KeyPair
 -dontwarn com.google.crypto.tink.subtle.Ed25519Sign
@@ -33,6 +27,7 @@
 -dontwarn com.google.crypto.tink.subtle.X25519
 -dontwarn java.beans.ConstructorProperties
 -dontwarn java.beans.Transient
+-dontwarn javax.xml.stream.FactoryConfigurationError
 -dontwarn javax.xml.stream.Location
 -dontwarn javax.xml.stream.XMLEventFactory
 -dontwarn javax.xml.stream.XMLInputFactory

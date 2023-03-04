@@ -13,6 +13,13 @@ android {
         dataBinding = true
         viewBinding = true
     }
+
+    packagingOptions {
+        resources.excludes += "META-INF/services/org.codehaus.stax2.validation.XMLValidationSchemaFactory.dtd"
+        resources.excludes += "META-INF/services/org.codehaus.stax2.validation.XMLValidationSchemaFactory.relaxng"
+        resources.excludes += "META-INF/services/org.codehaus.stax2.validation.XMLValidationSchemaFactory.w3c"
+
+    }
 }
 
 dependencies {
@@ -20,7 +27,6 @@ dependencies {
     implementation(projects.framework.ui)
     implementation(projects.framework.notification)
     implementation(projects.domain)
-    implementation(projects.dynamic)
     implementation(projects.library)
 
     implementation(libs.androidx.work.runtime.ktx)

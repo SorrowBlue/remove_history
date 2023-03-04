@@ -85,5 +85,4 @@ include(":settings:security")
 include(":settings:viewer")
 
 includeBuild("build-logic")
-include(":dynamic")
 include(":settings:feature")

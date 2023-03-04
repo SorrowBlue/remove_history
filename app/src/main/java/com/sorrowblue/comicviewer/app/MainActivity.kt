@@ -9,7 +9,6 @@ import androidx.core.splashscreen.SplashScreenViewProvider
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
-import androidx.navigation.dynamicfeatures.fragment.DynamicNavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.snackbar.Snackbar
@@ -22,7 +21,8 @@ import com.sorrowblue.comicviewer.folder.FolderFragmentArgs
 import com.sorrowblue.comicviewer.framework.ui.flow.launchInWithLifecycle
 import com.sorrowblue.comicviewer.framework.ui.fragment.CommonViewModel
 import com.sorrowblue.comicviewer.framework.ui.fragment.type
-import com.sorrowblue.comicviewer.framework.ui.navigation.FrameworkDynamicFragmentNavigator
+import com.sorrowblue.comicviewer.framework.ui.navigation.FrameworkDynamicNavHostFragment
+import com.sorrowblue.comicviewer.framework.ui.navigation.FrameworkFragmentNavigator
 import com.sorrowblue.jetpack.binding.viewBinding
 import dagger.hilt.android.AndroidEntryPoint
 import dev.chrisbanes.insetter.applyInsetter
@@ -59,7 +59,7 @@ internal class MainActivity : AppCompatActivity(R.layout.activity_main) {
         }.launchInWithLifecycle()
 
         val navController =
-            binding.navHostFragmentActivityMain.findNavController<DynamicNavHostFragment>()
+            binding.navHostFragmentActivityMain.findNavController<FrameworkDynamicNavHostFragment>()
         // 初期化処理未実施の場合
         if (commonViewModel.shouldKeepOnScreen) {
             // リストア Skip/完了 を待つ
@@ -74,13 +74,16 @@ internal class MainActivity : AppCompatActivity(R.layout.activity_main) {
         }
         binding.bottomNavigation.setupWithNavController(navController)
         navController.addOnDestinationChangedListener { _, destination, _ ->
-            if (destination is FrameworkDynamicFragmentNavigator.Destination) {
+            if (destination is FrameworkFragmentNavigator.Destination) {
                 binding.bottomNavigation.isShown(destination.isVisibleBottomNavigation)
                 binding.frameworkUiFab.isShownWithImageResource(
                     destination.isVisibleFab,
                     destination.fabIcon,
                     destination.fabLabel
                 )
+            } else {
+                binding.bottomNavigation.isShown(false)
+                binding.frameworkUiFab.isShownWithImageResource(false, 0, 0)
             }
         }
         binding.frame.applyInsetter {

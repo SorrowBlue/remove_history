@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <attr name="bottomNavVisible" format="boolean" />
     <attr name="fabVisible" format="boolean" />
     <attr name="fabIcon" format="reference" />
     <attr name="fabLabel" format="string|reference" />
-    <attr name="moduleName" format="string|reference" />
     <declare-styleable name="FrameworkDynamicFragmentNavigator">
-        <attr name="moduleName" />
         <attr name="bottomNavVisible" />
         <attr name="fabVisible" />
         <attr name="fabIcon" />

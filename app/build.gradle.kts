@@ -93,7 +93,6 @@ android {
     }
 
     dynamicFeatures += setOf(
-        ":dynamic",
         ":data:reader:document",
         ":data:reader:zip",
         ":library:googledrive",
@@ -101,14 +100,12 @@ android {
         ":library:dropbox",
         ":library:box"
     )
-
-//    lint {
-//        checkReleaseBuilds = false
-//        abortOnError = false
-//    }
 }
 
 dependencies {
+    api(libs.google.code.gson)
+    api(libs.androidx.browser)
+    api("com.fasterxml.jackson.core:jackson-core:2.14.2")
     api(libs.google.guava)
     implementation(projects.framework.ui)
     implementation(projects.framework.notification)
