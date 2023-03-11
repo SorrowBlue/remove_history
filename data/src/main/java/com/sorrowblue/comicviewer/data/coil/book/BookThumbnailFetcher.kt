@@ -48,7 +48,6 @@ internal class BookThumbnailFetcher(
             if (snapshot != null) {
                 // キャッシュされた画像は手動で追加された可能性が高いため、常にメタデータが空の状態で返されます。
                 if (fileSystem.metadata(snapshot.metadata).size == 0L) {
-                    logcat { "キャッシュされた画像は手動で追加された可能性が高いため、常にメタデータが空の状態で返されます。" }
                     return SourceResult(
                         source = snapshot.toImageSource(),
                         mimeType = null,
@@ -58,7 +57,6 @@ internal class BookThumbnailFetcher(
 
                 // 候補が適格である場合、キャッシュから候補を返します。
                 if (snapshot.toBookThumbnailMetadata() == BookThumbnailMetadata(book)) {
-                    logcat { "候補が適格である場合、キャッシュから候補を返します。" }
                     return SourceResult(
                         source = snapshot.toImageSource(),
                         mimeType = null,
@@ -68,19 +66,15 @@ internal class BookThumbnailFetcher(
             }
             val bookshelfModel = bookshelfLocalDataSource.get(book.bookshelfModelId).first()
                 ?: throw RuntimeException("本棚が取得できない")
-            logcat { "server" }
             var fileReader = remoteDataSourceFactory.create(bookshelfModel).fileReader(book)
                 ?: throw RuntimeException("FileReaderが取得できない")
-            logcat { "fileReader" }
             val bitmap = fileReader.thumbnailBitmap(requestWidth.toInt(), requestHeight.toInt())
                 ?: throw RuntimeException("画像を取得できない")
-            logcat { "bitmap" }
             try {
                 // 応答をディスク キャッシュに書き込み、新しいスナップショットを開きます。
                 snapshot =
                     writeToDiskCache(snapshot = snapshot, fileReader = fileReader, bitmap = bitmap)
                 if (snapshot != null) {
-                    logcat { "応答をディスク キャッシュに書き込み、新しいスナップショットを開きます。" }
                     return SourceResult(
                         source = snapshot.toImageSource(),
                         mimeType = null,
@@ -90,7 +84,6 @@ internal class BookThumbnailFetcher(
                 // 新しいスナップショットの読み取りに失敗した場合は、応答本文が空でない場合は読み取ります。
                 var bytes = fileReader.pageInputStream(0).use(InputStream::readBytes)
                 if (bytes.isNotEmpty()) {
-                    logcat { "新しいスナップショットの読み取りに失敗した場合は、応答本文が空でない場合は読み取ります。" }
                     return SourceResult(
                         source = ImageSource(Buffer().apply { write(bytes) }, context),
                         mimeType = null,

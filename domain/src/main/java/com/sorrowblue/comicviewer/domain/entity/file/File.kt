@@ -1,6 +1,6 @@
 package com.sorrowblue.comicviewer.domain.entity.file
 
-import android.util.Base64
+import com.sorrowblue.comicviewer.domain.Base64.encodeToBase64
 import com.sorrowblue.comicviewer.domain.entity.bookshelf.BookshelfId
 
 sealed interface File {
@@ -13,6 +13,6 @@ sealed interface File {
 
     val params: Map<String, String?>
 
-    fun base64Path(): String =
-        Base64.encodeToString(path.encodeToByteArray(), Base64.URL_SAFE or Base64.NO_WRAP)
+    fun base64Parent(): String = parent.encodeToBase64()
+    fun base64Path(): String = path.encodeToBase64()
 }

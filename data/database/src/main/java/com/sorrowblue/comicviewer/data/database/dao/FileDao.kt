@@ -102,10 +102,17 @@ internal interface FileDao {
         @Suppress("DEPRECATION") return pagingSource(query)
     }
 
-    fun pagingSourceQuery(bookshelfId: Int, q: String, sortType: SortType): PagingSource<Int, File> {
+    fun pagingSourceQuery(bookshelfId: Int, parent: String?, q: String, sortType: SortType): PagingSource<Int, File> {
         val query = SupportSQLiteQueryBuilder.builder("file").apply {
             columns(arrayOf("*"))
-            selection("bookshelf_id = :bookshelfId AND name LIKE :path", arrayOf(bookshelfId, "%$q%"))
+            if (parent != null) {
+                selection(
+                    "bookshelf_id = :bookshelfId AND parent LIKE :parent AND name LIKE :path",
+                    arrayOf(bookshelfId, "$parent%", "%$q%")
+                )
+            } else {
+                selection("bookshelf_id = :bookshelfId AND name LIKE :path", arrayOf(bookshelfId, "%$q%"))
+            }
             when (sortType) {
                 is SortType.NAME -> if (sortType.isAsc) "file_type_order, sort_index" else "file_type_order DESC, sort_index DESC"
                 is SortType.DATE -> if (sortType.isAsc) "file_type_order, last_modified, sort_index" else "file_type_order DESC, last_modified DESC, sort_index DESC"

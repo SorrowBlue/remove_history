@@ -7,7 +7,7 @@ import com.sorrowblue.comicviewer.domain.request.BaseRequest
 
 abstract class PagingQueryFileUseCase : PagingUseCase<PagingQueryFileUseCase.Request, File>() {
 
-    class Request(val pagingConfig: PagingConfig, val bookshelf: Bookshelf, val query: () -> String) :
+    class Request(val pagingConfig: PagingConfig, val bookshelf: Bookshelf, val parent: () -> String?, val query: () -> String) :
         BaseRequest {
 
         override fun validate(): Boolean {

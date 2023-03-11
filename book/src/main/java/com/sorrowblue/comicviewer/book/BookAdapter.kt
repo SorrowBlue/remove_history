@@ -15,7 +15,6 @@ import com.sorrowblue.comicviewer.book.databinding.BookItemBinding
 import com.sorrowblue.comicviewer.book.databinding.BookItemNextBinding
 import com.sorrowblue.comicviewer.domain.entity.file.Book
 import com.sorrowblue.comicviewer.domain.request.BookPageRequest
-import com.sorrowblue.comicviewer.framework.ui.fragment.encodeBase64
 import com.sorrowblue.comicviewer.framework.ui.recyclerview.ViewBindingViewHolder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -85,7 +84,7 @@ internal class BookAdapter(
                 binding.bookNext.text = if (isNext) "次の本" else "前の本"
                 binding.bookNext.isVisible = true
                 binding.bookNext.setOnClickListener {
-                    val bundle = BookFragmentArgs(book.bookshelfId.value, book.path.encodeBase64()).toBundle()
+                    val bundle = BookFragmentArgs(book).toBundle()
                     it.findNavController().navigate(
                         R.id.book_navigation,
                         bundle,
@@ -165,7 +164,7 @@ internal class BookAdapter(
                                 input
                             }
                         }
-                    })
+                    },WhiteTrimTransformation)
                 }.apply {
                     job.invokeOnCompletion {
                         disposableList[item.index] = null
@@ -176,19 +175,19 @@ internal class BookAdapter(
 
         fun leftLoad(item: BookPage.Split) {
             binding.image.load(BookPageRequest(book to item.index)) {
-                transformations(MihirakiSplitTransformation(true))
+                transformations(MihirakiSplitTransformation(true),WhiteTrimTransformation)
             }
         }
 
         fun rightLoad(item: BookPage.Split) {
             binding.image.load(BookPageRequest(book to item.index)) {
-                transformations(MihirakiSplitTransformation(false))
+                transformations(MihirakiSplitTransformation(false),WhiteTrimTransformation)
             }
         }
 
         fun load(item: BookPage.Split) {
             binding.image.load(BookPageRequest(book to item.index)) {
-                transformations()
+                transformations(WhiteTrimTransformation)
             }
         }
     }

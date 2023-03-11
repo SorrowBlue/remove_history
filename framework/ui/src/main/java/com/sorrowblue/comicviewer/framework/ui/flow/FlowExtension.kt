@@ -21,9 +21,6 @@ context(AppCompatActivity)
 fun <T> Flow<T>.launchInWithLifecycle() = flowWithLifecycle(lifecycle).launchIn(lifecycleScope)
 
 context(Fragment)
-fun <T> Flow<T>.launchIn() = launchIn(viewLifecycleOwner.lifecycleScope)
-
-context(Fragment)
 fun <T> Flow<T>.launchInWithLifecycle() = flowWithLifecycle(viewLifecycleOwner.lifecycle).launchIn(viewLifecycleOwner.lifecycleScope)
 
 context(Fragment)

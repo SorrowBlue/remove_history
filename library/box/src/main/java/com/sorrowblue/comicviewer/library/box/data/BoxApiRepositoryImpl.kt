@@ -2,6 +2,9 @@ package com.sorrowblue.comicviewer.library.box.data
 
 import androidx.datastore.core.DataStore
 import com.box.sdk.BoxAPIConnection
+import com.box.sdk.BoxAPIConnectionListener
+import com.box.sdk.BoxAPIException
+import com.box.sdk.BoxAPIResponseException
 import com.box.sdk.BoxFile
 import com.box.sdk.BoxFolder
 import com.box.sdk.BoxItem
@@ -9,12 +12,17 @@ import com.box.sdk.BoxUser
 import com.box.sdk.PagingParameters
 import com.box.sdk.SortParameters
 import java.io.OutputStream
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import logcat.asLog
 import logcat.logcat
 
 private const val CLIENT_ID = "nihdm7dthg9lm7m3b41bpw7jp7b0lb9z"
@@ -24,30 +32,37 @@ internal class BoxApiRepositoryImpl(
     private val dropboxCredentialDataStore: DataStore<BoxConnectionState>,
 ) : BoxApiRepository {
 
-    private val apiFlow = dropboxCredentialDataStore.data.distinctUntilChangedBy { it.state }.map {
+    private val api = runBlocking { dropboxCredentialDataStore.data.first() }.let {
         if (it.state != null) {
-            withContext(Dispatchers.IO) {
-                val restoreApi = BoxAPIConnection.restore(CLIENT_ID, CLIENT_SECRET, it.state)
-                kotlin.runCatching {
-                    logcat { "ユーザ取得。" }
-                    BoxUser.getCurrentUser(restoreApi)
-                }.fold({
-                    logcat { "ユーザ取得。成功、id=${it.id}" }
-                    restoreApi
-                }, { throwable ->
-                    throwable.printStackTrace()
-                    logcat { "ユーザ取得。失敗" }
-                    dropboxCredentialDataStore.updateData { it.copy(state = null) }
-                    null
-                })
-            }
+            BoxAPIConnection.restore(CLIENT_ID, CLIENT_SECRET, it.state)
         } else {
-            null
+            BoxAPIConnection(CLIENT_ID, CLIENT_SECRET)
         }
     }
 
+    init {
+        api.maxRetryAttempts = 2
+        api.addListener(object : BoxAPIConnectionListener {
+            override fun onRefresh(api: BoxAPIConnection) {
+                logcat { "onRefresh $api" }
+                @OptIn(DelicateCoroutinesApi::class)
+                GlobalScope.launch {
+                    dropboxCredentialDataStore.updateData { it.copy(state = api.save()) }
+                }
+            }
+
+            override fun onError(api: BoxAPIConnection?, error: BoxAPIException?) {
+                logcat { "onRefresh $api" }
+                logcat { error?.asLog().orEmpty() }
+                @OptIn(DelicateCoroutinesApi::class)
+                GlobalScope.launch {
+                    dropboxCredentialDataStore.updateData { it.copy(state = null) }
+                }
+            }
+        })
+    }
+
     override suspend fun authenticate(state: String, code: String, onSuccess: () -> Unit) {
-        val api = BoxAPIConnection(CLIENT_ID, CLIENT_SECRET)
         kotlin.runCatching {
             withContext(Dispatchers.IO) {
                 api.authenticate(code)
@@ -64,66 +79,88 @@ internal class BoxApiRepositoryImpl(
         }
     }
 
-    override val userInfoFlow = apiFlow.map {
-        if (it != null) {
-            kotlin.runCatching {
-                withContext(Dispatchers.IO) {
-                    BoxUser.getCurrentUser(it).getInfo("id", "avatar_url", "name")
-                }
-            }.getOrNull()
-        } else {
+    override val userInfoFlow = dropboxCredentialDataStore.data.map {
+        try {
+            BoxUser.getCurrentUser(api).getInfo("id", "avatar_url", "name")
+        } catch (e: BoxAPIResponseException) {
+            if (e.responseCode == 401) {
+                logcat { "トークン切れ" }
+                dropboxCredentialDataStore.updateData { it.copy(state = null) }
+            }
+            logcat { e.asLog() }
             null
         }
-    }
+    }.flowOn(Dispatchers.IO)
 
     override suspend fun currentUser(): BoxUser? {
-        val api = apiFlow.first() ?: return null
         return kotlin.runCatching { BoxUser.getCurrentUser(api) }.getOrNull()
     }
 
     override fun isAuthenticated(): Flow<Boolean> {
-        return apiFlow.map { it != null }
+        return dropboxCredentialDataStore.data.map { it.state != null }
     }
 
     override suspend fun signOut() {
         withContext(Dispatchers.IO) {
-            apiFlow.first()?.let { api ->
+            try {
                 api.revokeToken()
+                dropboxCredentialDataStore.updateData { it.copy(state = null) }
+            } catch (e: BoxAPIResponseException) {
+                logcat { e.asLog() }
                 dropboxCredentialDataStore.updateData { it.copy(state = null) }
             }
         }
     }
 
-    override suspend fun list(path: String?, limit: Long, offset: Long): List<BoxItem.Info>? {
-        val api = apiFlow.first() ?: return null
-        val folder = if (path == null) {
-            BoxFolder.getRootFolder(api)
-        } else {
-            BoxFolder(api, path)
+    override suspend fun list(path: String?, limit: Long, offset: Long): List<BoxItem.Info> {
+        val folder = try {
+            if (path == null) {
+                BoxFolder.getRootFolder(api)
+            } else {
+                BoxFolder(api, path)
+            }
+        } catch (e: Exception) {
+            logcat { e.asLog() }
+            logcat { "トークン切れ" }
+            dropboxCredentialDataStore.updateData { it.copy(state = null) }
+            return emptyList()
         }
-        logcat { "フォルダ, id=${folder.id}, ${folder.getInfo("name").name}" }
         val sorting = SortParameters.none()
         val paging = PagingParameters.offset(offset, limit)
-        val iterator = folder.getChildren(sorting, paging, "id", "name", "type","size", "modified_at")
-        return iterator.onEach {
-            logcat { "フォルダ, id=${it.id}, ${it.name}" }
-        }.toList().apply {
-            logcat { "フォルダリスト size=${size}" }
+        val iterator =
+            folder.getChildren(sorting, paging, "id", "name", "type", "size", "modified_at")
+        return try {
+            iterator.onEach {
+                logcat { "フォルダ, id=${it.id}, ${it.name}" }
+            }.toList().apply {
+                logcat { "フォルダリスト size=${size}" }
+            }
+        } catch (e: BoxAPIResponseException) {
+            logcat { e.asLog() }
+            if (e.responseCode == 401) {
+                logcat { "トークン切れ" }
+                dropboxCredentialDataStore.updateData { it.copy(state = null) }
+            }
+            return emptyList()
         }
     }
 
     override suspend fun fileThumbnail(id: String): String? {
-        val api = apiFlow.first() ?: return null
         return withContext(Dispatchers.IO) {
             BoxFile(
                 api,
                 id
-            ).getInfoWithRepresentations("[jpg?dimensions=32x32]").representations.firstOrNull()?.content?.urlTemplate?.replace("{+asset_path}","")
+            ).getInfoWithRepresentations("[jpg?dimensions=32x32]").representations.firstOrNull()?.content?.urlTemplate?.replace(
+                "{+asset_path}",
+                ""
+            )
         }
     }
 
     override suspend fun accessToken(): String {
-        return apiFlow.first()?.accessToken.orEmpty()
+        return withContext(Dispatchers.IO) {
+            api.accessToken.orEmpty()
+        }
     }
 
     override suspend fun download(
@@ -131,7 +168,6 @@ internal class BoxApiRepositoryImpl(
         outputStream: OutputStream,
         progress: (Double) -> Unit
     ) {
-        val api = apiFlow.first() ?: return
         BoxFile(api, path).download(outputStream) { numBytes, totalBytes ->
             progress.invoke(numBytes.toDouble() / totalBytes)
         }

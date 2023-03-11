@@ -59,6 +59,7 @@ interface FileModelLocalDataSource {
     fun pagingSource(
         pagingConfig: PagingConfig,
         bookshelfModelId: BookshelfModelId,
+        parent: () -> String?,
         query: () -> String,
         sortType: () -> SortType
     ): Flow<PagingData<FileModel>>

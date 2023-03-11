@@ -10,14 +10,14 @@
         tools:layout="@layout/library_item_list">
         <argument
             android:name="parent"
+            android:defaultValue="@null"
             app:argType="string"
-            app:nullable="true"
-            android:defaultValue="@null" />
+            app:nullable="true" />
         <argument
             android:name="transition_name"
+            android:defaultValue="@null"
             app:argType="string"
-            app:nullable="true"
-            android:defaultValue="@null" />
+            app:nullable="true" />
         <action
             android:id="@+id/action_googledrive_list_self"
             app:destination="@id/googledrive_list_fragment" />
@@ -26,16 +26,22 @@
             app:destination="@id/googledrive_signin_fragment"
             app:popUpTo="@id/googledrive_list_fragment"
             app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_googledrive_list_to_googledrive_profile"
+            app:destination="@id/googledrive_profile_fragment" />
     </fragment>
     <fragment
         android:id="@+id/googledrive_signin_fragment"
         android:name="com.sorrowblue.comicviewer.library.googledrive.signin.GoogleDriveSignInFragment"
         android:label="Google ドライブ"
-        tools:layout="@layout/library_fragment_signin">
+        tools:layout="@layout/googledrive_fragment_signin">
         <action
             android:id="@+id/action_googledrive_signin_to_googledrive_list"
             app:destination="@id/googledrive_list_fragment"
             app:popUpTo="@id/googledrive_signin_fragment"
             app:popUpToInclusive="true" />
     </fragment>
+    <dialog
+        android:id="@+id/googledrive_profile_fragment"
+        android:name="com.sorrowblue.comicviewer.library.googledrive.profile.GoogleDriveProfileFragment" />
 </navigation>

@@ -96,11 +96,13 @@ internal class FileRepositoryImpl @Inject constructor(
     override fun pagingDataFlow(
         pagingConfig: PagingConfig,
         bookshelf: Bookshelf,
+        parent: () -> String?,
         query: () -> String,
     ): Flow<PagingData<File>> {
         return fileModelLocalDataSource.pagingSource(
             pagingConfig,
             BookshelfModelId(bookshelf.id.value),
+            parent,
             query
         ) {
             val settings = runBlocking { settingsCommonRepository.folderDisplaySettings.first() }

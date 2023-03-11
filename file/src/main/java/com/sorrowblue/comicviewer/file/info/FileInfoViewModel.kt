@@ -3,11 +3,11 @@ package com.sorrowblue.comicviewer.file.info
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.sorrowblue.comicviewer.domain.Base64.decodeFromBase64
 import com.sorrowblue.comicviewer.domain.entity.bookshelf.BookshelfId
 import com.sorrowblue.comicviewer.domain.entity.file.Book
 import com.sorrowblue.comicviewer.domain.usecase.AddReadLaterUseCase
 import com.sorrowblue.comicviewer.domain.usecase.file.GetFileUseCase
-import com.sorrowblue.comicviewer.framework.ui.fragment.decodeBase64
 import com.sorrowblue.comicviewer.framework.ui.navigation.SupportSafeArgs
 import com.sorrowblue.comicviewer.framework.ui.navigation.navArgs
 import com.sorrowblue.comicviewer.framework.ui.navigation.stateIn
@@ -27,7 +27,7 @@ internal class FileInfoViewModel @Inject constructor(
     private val args: FileInfoFragmentArgs by navArgs()
 
     val fileFlow =
-        getFileUseCase.execute(GetFileUseCase.Request(args.bookshelfId, args.path.decodeBase64()))
+        getFileUseCase.execute(GetFileUseCase.Request(args.bookshelfId, args.path.decodeFromBase64()))
             .map { it.dataOrNull }
             .stateIn { null }
 

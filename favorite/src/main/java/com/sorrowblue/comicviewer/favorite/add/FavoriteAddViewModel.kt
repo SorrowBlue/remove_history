@@ -5,12 +5,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
+import com.sorrowblue.comicviewer.domain.Base64.decodeFromBase64
 import com.sorrowblue.comicviewer.domain.entity.bookshelf.BookshelfId
 import com.sorrowblue.comicviewer.domain.entity.favorite.Favorite
 import com.sorrowblue.comicviewer.domain.entity.favorite.FavoriteFile
 import com.sorrowblue.comicviewer.domain.usecase.favorite.AddFavoriteFileUseCase
 import com.sorrowblue.comicviewer.domain.usecase.paging.PagingFavoriteUseCase
-import com.sorrowblue.comicviewer.framework.ui.fragment.decodeBase64
 import com.sorrowblue.comicviewer.framework.ui.navigation.SupportSafeArgs
 import com.sorrowblue.comicviewer.framework.ui.navigation.navArgs
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -37,7 +37,7 @@ internal class FavoriteAddViewModel @Inject constructor(
                     FavoriteFile(
                         favorite.id,
                         BookshelfId(args.serverId),
-                        args.filePath.decodeBase64()
+                        args.filePath.decodeFromBase64()
                     )
                 )
             ).collect()

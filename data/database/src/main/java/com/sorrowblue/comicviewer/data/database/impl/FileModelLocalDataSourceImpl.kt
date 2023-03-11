@@ -103,12 +103,14 @@ internal class FileModelLocalDataSourceImpl @Inject constructor(
     override fun pagingSource(
         pagingConfig: PagingConfig,
         bookshelfModelId: BookshelfModelId,
+        parent: () -> String?,
         query: () -> String,
         sortType: () -> SortType,
     ): Flow<PagingData<FileModel>> {
         return Pager(pagingConfig) {
             dao.pagingSourceQuery(
                 bookshelfModelId.value,
+                parent(),
                 query(),
                 sortType()
             )

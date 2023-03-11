@@ -9,7 +9,6 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.snackbar.Snackbar
 import com.sorrowblue.comicviewer.file.R
 import com.sorrowblue.comicviewer.file.databinding.FileFragmentInfoBinding
-import com.sorrowblue.comicviewer.framework.ui.fragment.encodeBase64
 import com.sorrowblue.jetpack.binding.viewBinding
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -28,10 +27,10 @@ internal class FileInfoFragment : BottomSheetDialogFragment(R.layout.file_fragme
             }
         }
         binding.addFavorite.setOnClickListener {
-            findNavController().navigate("comicviewer://comicviewer.sorrowblue.com/favorite/add?serverId=${viewModel.fileFlow.value!!.bookshelfId.value}&filePath=${viewModel.fileFlow.value!!.path.encodeBase64()}".toUri())
+            findNavController().navigate("comicviewer://comicviewer.sorrowblue.com/favorite/add?serverId=${viewModel.fileFlow.value!!.bookshelfId.value}&filePath=${viewModel.fileFlow.value!!.base64Path()}".toUri())
         }
         binding.openFolder.setOnClickListener {
-            requireParentFragment().findNavController().navigate("comicviewer://comicviewer.sorrowblue.com/folder?serverId=${viewModel.fileFlow.value!!.bookshelfId.value}&path=${viewModel.fileFlow.value!!.parent.encodeBase64()}".toUri())
+            requireParentFragment().findNavController().navigate("comicviewer://comicviewer.sorrowblue.com/folder?serverId=${viewModel.fileFlow.value!!.bookshelfId.value}&path=${viewModel.fileFlow.value!!.base64Parent()}".toUri())
         }
     }
 }

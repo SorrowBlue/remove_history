@@ -3,7 +3,6 @@ package com.sorrowblue.comicviewer.settings.viewer
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
 import androidx.preference.DropDownPreference
 import androidx.preference.SeekBarPreference
 import androidx.preference.SwitchPreferenceCompat
@@ -14,11 +13,9 @@ import com.sorrowblue.comicviewer.framework.settings.preference
 import com.sorrowblue.comicviewer.framework.settings.preferenceBinding
 import com.sorrowblue.comicviewer.framework.ui.flow.launchInWithLifecycle
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 
 class SettingsViewerBinding(fragment: FrameworkPreferenceFragment) :
     FrameworkPreferenceBinding(fragment) {
@@ -29,6 +26,7 @@ class SettingsViewerBinding(fragment: FrameworkPreferenceFragment) :
     val brightnessLevel by preference<SeekBarPreference>(R.string.settings_viewer_preference_key_brightness_level)
     val imageQuality by preference<SeekBarPreference>(R.string.settings_viewer_preference_key_image_quality)
     val readingDirection by preference<DropDownPreference>(R.string.settings_viewer_preference_key_binding_direction)
+    val preloadPages by preference<SeekBarPreference>(R.string.settings_viewer_prefkey_preload_pages)
 }
 
 @AndroidEntryPoint
@@ -66,25 +64,34 @@ internal class SettingsViewerFragment :
         }
 
         binding.readingDirection.setEntries(R.array.settings_viewer_entries_binding_direction)
-        binding.readingDirection.entryValues = arrayOf(ViewerSettings.BindingDirection.RIGHT.name, ViewerSettings.BindingDirection.LEFT.name)
+        binding.readingDirection.entryValues = arrayOf(
+            ViewerSettings.BindingDirection.RIGHT.name,
+            ViewerSettings.BindingDirection.LEFT.name
+        )
         binding.readingDirection.setOnPreferenceChangeListener<String> { _, newValue ->
             viewModel.updateBindingDirection(ViewerSettings.BindingDirection.valueOf(newValue))
+            false
+        }
+        binding.preloadPages.setOnPreferenceChangeListener<Int> { _, newValue ->
+            viewModel.updateReadAheadPageCount(newValue)
             false
         }
         viewModel.settings.map { it.bindingDirection }.distinctUntilChanged().onEach {
             binding.readingDirection.value = it.name
         }.launchInWithLifecycle()
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.settings.collectLatest {
-                binding.statusBar.isChecked = it.showStatusBar
-                binding.navigationBar.isChecked = it.showNavigationBar
-                binding.notTurnOffScreen.isChecked = it.keepOnScreen
-                binding.brightnessControl.isChecked = it.enableBrightnessControl
-                binding.brightnessLevel.isEnabled = it.enableBrightnessControl
-                binding.brightnessLevel.value = (it.screenBrightness * 100).toInt()
-                binding.imageQuality.value = it.imageQuality
-            }
-        }
+        viewModel.showStatusBar.onEach(binding.statusBar::setChecked).launchInWithLifecycle()
+        viewModel.showNavigationBar.onEach(binding.navigationBar::setChecked)
+            .launchInWithLifecycle()
+        viewModel.notTurnOffScreen.onEach(binding.notTurnOffScreen::setChecked)
+            .launchInWithLifecycle()
+        viewModel.brightnessControl.onEach {
+            binding.brightnessControl.isChecked = it
+            binding.brightnessLevel.isEnabled = it
+        }.launchInWithLifecycle()
+        viewModel.brightnessLevel.onEach { binding.brightnessLevel.value = (it * 100).toInt() }
+            .launchInWithLifecycle()
+        viewModel.imageQuality.onEach(binding.imageQuality::setValue).launchInWithLifecycle()
+        viewModel.preloadPages.onEach(binding.preloadPages::setValue).launchInWithLifecycle()
     }
 }

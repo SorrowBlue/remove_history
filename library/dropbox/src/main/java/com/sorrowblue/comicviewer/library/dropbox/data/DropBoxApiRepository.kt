@@ -13,7 +13,6 @@ import kotlinx.serialization.ExperimentalSerializationApi
 @OptIn(ExperimentalSerializationApi::class)
 interface DropBoxApiRepository {
 
-    fun isAuthenticated(): Flow<Boolean>
     suspend fun storeCredential(dbxCredential: DbxCredential)
 
     val accountFlow: Flow<FullAccount?>
@@ -32,7 +31,8 @@ interface DropBoxApiRepository {
 
         fun getInstance(context: Context) = instance ?: DropBoxApiRepositoryImpl(
             context,
-            context.dropboxCredentialDataStore
         ).also { instance = it }
     }
+
+    val isAuthenticated: Flow<Boolean>
 }

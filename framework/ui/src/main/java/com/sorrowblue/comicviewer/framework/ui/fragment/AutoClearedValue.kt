@@ -1,6 +1,5 @@
 package com.sorrowblue.comicviewer.framework.ui.fragment
 
-import android.util.Base64
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -36,9 +35,3 @@ class AutoClearedValue<T : Any>(fragment: Fragment) : ReadWriteProperty<Fragment
         _value = value
     }
 }
-
-fun String.decodeBase64() =
-    Base64.decode(encodeToByteArray(), Base64.URL_SAFE or Base64.NO_WRAP).decodeToString()
-
-fun String.encodeBase64(): String =
-    Base64.encodeToString(encodeToByteArray(), Base64.URL_SAFE or Base64.NO_WRAP)

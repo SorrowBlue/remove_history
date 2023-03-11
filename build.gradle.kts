@@ -1,3 +1,5 @@
+import java.util.Locale
+
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
@@ -19,7 +21,8 @@ tasks.register("clean", Delete::class) {
 }
 
 fun isNonStable(version: String): Boolean {
-    val stableKeyword = listOf("RELEASE", "FINAL", "GA").any { version.toUpperCase().contains(it) }
+    val stableKeyword =
+        listOf("RELEASE", "FINAL", "GA").any { version.uppercase(Locale.getDefault()).contains(it) }
     val regex = "^[0-9,.v-]+(-r)?$".toRegex()
     val isStable = stableKeyword || regex.matches(version)
     return isStable.not()

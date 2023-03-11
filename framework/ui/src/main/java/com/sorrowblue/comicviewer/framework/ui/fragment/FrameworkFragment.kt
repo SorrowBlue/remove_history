@@ -3,9 +3,12 @@ package com.sorrowblue.comicviewer.framework.ui.fragment
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import androidx.annotation.IdRes
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavDirections
+import androidx.navigation.NavOptions
+import androidx.navigation.Navigator
 import androidx.navigation.fragment.FragmentNavigator
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -51,11 +54,22 @@ open class FrameworkFragment(contentLayoutId: Int) : Fragment(contentLayoutId) {
     protected fun navigate(directions: NavDirections) {
         findNavController().navigate(directions)
     }
+
     protected fun navigate(uri: Uri) {
         findNavController().navigate(uri)
     }
+
     protected fun navigate(directions: NavDirections, extras: FragmentNavigator.Extras) {
         findNavController().navigate(directions, extras)
+    }
+
+    protected fun navigate(
+        @IdRes resId: Int,
+        args: Bundle?,
+        navOptions: NavOptions?,
+        navigatorExtras: Navigator.Extras?
+    ) {
+        findNavController().navigate(resId, args, navOptions, navigatorExtras)
     }
 
     protected fun Toolbar.setupWithNavController() {

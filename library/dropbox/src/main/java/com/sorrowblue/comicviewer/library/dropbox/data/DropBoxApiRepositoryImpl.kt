@@ -5,6 +5,7 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.datastore.core.DataStore
+import androidx.datastore.dataStore
 import com.dropbox.core.DbxRequestConfig
 import com.dropbox.core.oauth.DbxCredential
 import com.dropbox.core.v2.DbxClientV2
@@ -12,16 +13,21 @@ import com.dropbox.core.v2.files.ListFolderResult
 import com.dropbox.core.v2.users.FullAccount
 import java.io.OutputStream
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.ExperimentalSerializationApi
+import logcat.asLog
+import logcat.logcat
 
-internal class DropBoxApiRepositoryImpl(
-    context: Context,
-    private val dropboxCredentialDataStore: DataStore<DropboxCredential>
-) : DropBoxApiRepository {
+@OptIn(ExperimentalSerializationApi::class)
+private val Context.dropboxCredentialDataStore: DataStore<DropboxCredential> by dataStore(
+    fileName = "dropbox_credential.pb", serializer = DropboxCredential.Serializer()
+)
+
+internal class DropBoxApiRepositoryImpl(context: Context) : DropBoxApiRepository {
+    private val dropboxCredentialDataStore = context.dropboxCredentialDataStore
 
     private val config = DbxRequestConfig
         .newBuilder("ComicViewerAndroid/${context.getPackageInfo().longVersionCode}")
@@ -31,16 +37,14 @@ internal class DropBoxApiRepositoryImpl(
         return DbxClientV2(config, readCredential())
     }
 
-    override fun isAuthenticated(): Flow<Boolean> {
-        return dropboxCredentialDataStore.data.map { credential ->
-            credential.credential != null && kotlin.runCatching {
-                client().check().user("auth_check").result == "auth_check"
-            }.onFailure {
-                it.printStackTrace()
-                dropboxCredentialDataStore.updateData { it.copy(credential = null) }
-            }.getOrDefault(false)
-        }
-    }
+    override val isAuthenticated = dropboxCredentialDataStore.data.map { credential ->
+        credential.credential != null && kotlin.runCatching {
+            client().check().user("auth_check").result == "auth_check"
+        }.onFailure {
+            logcat { it.asLog() }
+            dropboxCredentialDataStore.updateData { it.copy(credential = null) }
+        }.getOrDefault(false)
+    }.flowOn(Dispatchers.IO)
 
     override suspend fun storeCredential(dbxCredential: DbxCredential) {
         withContext(Dispatchers.IO) {
@@ -61,7 +65,7 @@ internal class DropBoxApiRepositoryImpl(
     }.flowOn(Dispatchers.IO)
 
     override suspend fun currentAccount(): FullAccount? {
-        return if (isAuthenticated().first()) {
+        return if (isAuthenticated.first()) {
             kotlin.runCatching { client().users().currentAccount }.onFailure {
                 it.printStackTrace()
             }.getOrNull()
@@ -78,7 +82,7 @@ internal class DropBoxApiRepositoryImpl(
     }
 
     override suspend fun list(path: String, limit: Long, cursor: String?): ListFolderResult? {
-        return if (isAuthenticated().first()) {
+        return if (isAuthenticated.first()) {
             kotlin.runCatching {
                 if (cursor != null) {
                     client().files().listFolderContinue(cursor)

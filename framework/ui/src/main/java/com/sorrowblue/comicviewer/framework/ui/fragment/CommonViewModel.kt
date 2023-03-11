@@ -13,4 +13,5 @@ class CommonViewModel @Inject constructor() : ViewModel() {
     var shouldKeepOnScreen = true
 
     val isRestored = MutableSharedFlow<Boolean>(1)
+    val isVisibleBottomNav = MutableSharedFlow<Boolean>(extraBufferCapacity = 1)
 }

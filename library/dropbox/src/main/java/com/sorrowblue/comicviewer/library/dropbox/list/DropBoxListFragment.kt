@@ -1,48 +1,34 @@
 package com.sorrowblue.comicviewer.library.dropbox.list
 
-import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.navGraphViewModels
 import androidx.work.Constraints
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkManager
 import androidx.work.workDataOf
-import coil.load
 import com.sorrowblue.comicviewer.domain.entity.file.File
 import com.sorrowblue.comicviewer.framework.notification.ChannelID
 import com.sorrowblue.comicviewer.framework.ui.flow.launchInWithLifecycle
-import com.sorrowblue.comicviewer.framework.ui.fragment.PagingFragment
-import com.sorrowblue.comicviewer.framework.ui.fragment.type
-import com.sorrowblue.comicviewer.library.databinding.LibraryFragmentCloudBinding
-import com.sorrowblue.jetpack.binding.viewBinding
-import dev.chrisbanes.insetter.applyInsetter
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filterNot
+import com.sorrowblue.comicviewer.library.dropbox.data.DropBoxApiRepositoryImpl
+import com.sorrowblue.comicviewer.library.filelist.LibraryFileListFragment
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.onEach
 
-internal class DropBoxListFragment :
-    PagingFragment<File>(com.sorrowblue.comicviewer.library.R.layout.library_fragment_cloud) {
+internal class DropBoxListFragment : LibraryFileListFragment() {
 
-    private val binding: LibraryFragmentCloudBinding by viewBinding()
-    override val viewModel: DropBoxListViewModel by viewModels()
+    override val viewModel: DropBoxListViewModel by viewModels {
+        DropBoxListViewModel.Factory(DropBoxApiRepositoryImpl(requireContext()))
+    }
 
     override val adapter
-        get() = DropBoxListAdapter {
-            val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
-            intent.addCategory(Intent.CATEGORY_OPENABLE)
-            intent.putExtra(Intent.EXTRA_TITLE, it.name)
-            intent.type = "*/*"
-            file = it
-            createFileRequest.launch(intent)
+        get() = DropBoxListAdapter(::createFile) {
+            navigate(DropBoxListFragmentDirections.actionDropboxListSelf(it.parent))
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,54 +46,25 @@ internal class DropBoxListFragment :
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        appBarConfiguration = AppBarConfiguration(setOf())
-        binding.toolbar.setupWithNavController()
-        binding.toolbar.applyInsetter {
-            type(systemBars = true, displayCutout = true) {
-                padding(horizontal = true)
-                margin(top = true)
-            }
-        }
-
-        binding.recyclerView.applyInsetter {
-            type(systemBars = true, displayCutout = true) {
-                padding(horizontal = true, bottom = true)
-            }
-        }
-
-        viewModel.account.filterNotNull().onEach {
-            binding.displayName.text = it.name.displayName
-            binding.profileImage.load(it.profilePhotoUrl)
-        }.launchInWithLifecycle()
-
-        binding.signOut.setOnClickListener {
-            viewModel.signOut()
-        }
-        viewModel.isAuthenticated().distinctUntilChanged().filterNot { it }.onEach {
-            findNavController().navigate(DropBoxListFragmentDirections.actionDropboxListToDropboxSignin())
-        }.launchInWithLifecycle()
+        viewModel.account.filterNotNull()
+            .onEach { profileImage.load(it.profilePhotoUrl) }
+            .launchInWithLifecycle()
     }
 
-    private lateinit var file: File
+    override fun enqueueDownload(outputUri: String, file: File) {
+        val request = OneTimeWorkRequestBuilder<DropBoxDownloadWorker>()
+            .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+            .setInputData(workDataOf("outputUri" to outputUri, "path" to file.path))
+            .setConstraints(Constraints.Builder().setRequiresStorageNotLow(true).build())
+            .build()
+        WorkManager.getInstance(requireContext()).enqueue(request)
+    }
 
-    private val createFileRequest =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            if (it.resultCode == Activity.RESULT_OK && it.data?.data != null) {
-                val request = OneTimeWorkRequestBuilder<DropBoxDownloadWorker>()
-                    .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-                    .setInputData(
-                        workDataOf(
-                            "outputUri" to it.data!!.data!!.toString(),
-                            "path" to file.path
-                        )
-                    )
-                    .setConstraints(
-                        Constraints.Builder()
-                            .setRequiresStorageNotLow(true)
-                            .build()
-                    )
-                    .build()
-                WorkManager.getInstance(requireContext()).enqueue(request)
-            }
-        }
+    override fun navigateToSignIn() {
+        findNavController().navigate(DropBoxListFragmentDirections.actionDropboxListToDropboxSignin())
+    }
+
+    override fun navigateToProfile() {
+        TODO("Not yet implemented")
+    }
 }

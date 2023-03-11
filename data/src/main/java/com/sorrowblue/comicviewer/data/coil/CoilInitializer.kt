@@ -38,7 +38,7 @@ internal class CoilInitializer : Initializer<Unit> {
             add(FavoriteMapper())
             add(MyComponent.favoriteThumbnailFetcher(context))
         }
-            .logger(LogcatLogger())
+//            .logger(LogcatLogger())
             .allowRgb565(true)
             .bitmapConfig(Bitmap.Config.RGB_565)
             .precision(Precision.INEXACT)

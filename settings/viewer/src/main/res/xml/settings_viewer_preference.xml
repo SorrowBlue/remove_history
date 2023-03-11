@@ -33,7 +33,7 @@
         android:title="常に最初のページを表示する" />
 
     <SeekBarPreference
-        android:key="事前に読み込むページ数"
+        android:key="@string/settings_viewer_prefkey_preload_pages"
         android:max="10"
         android:title="事前に読み込むページ数"
         app:min="0"

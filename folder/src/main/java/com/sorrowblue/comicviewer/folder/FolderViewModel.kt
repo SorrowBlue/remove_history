@@ -1,27 +1,24 @@
 package com.sorrowblue.comicviewer.folder
 
-import android.util.Base64
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
+import com.sorrowblue.comicviewer.domain.Base64.decodeFromBase64
 import com.sorrowblue.comicviewer.domain.entity.bookshelf.BookshelfId
-import com.sorrowblue.comicviewer.domain.entity.file.File
-import com.sorrowblue.comicviewer.domain.entity.settings.FolderDisplaySettings
 import com.sorrowblue.comicviewer.domain.model.ScanType
 import com.sorrowblue.comicviewer.domain.usecase.ScanBookshelfUseCase
 import com.sorrowblue.comicviewer.domain.usecase.bookshelf.GetBookshelfFolderUseCase
 import com.sorrowblue.comicviewer.domain.usecase.paging.PagingFileUseCase
 import com.sorrowblue.comicviewer.domain.usecase.paging.PagingQueryFileUseCase
 import com.sorrowblue.comicviewer.domain.usecase.settings.ManageFolderDisplaySettingsUseCase
-import com.sorrowblue.comicviewer.framework.ui.fragment.PagingViewModel
+import com.sorrowblue.comicviewer.file.list.FileListViewModel
 import com.sorrowblue.comicviewer.framework.ui.navigation.SupportSafeArgs
 import com.sorrowblue.comicviewer.framework.ui.navigation.navArgs
 import com.sorrowblue.comicviewer.framework.ui.navigation.stateIn
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
@@ -37,23 +34,19 @@ internal class FolderViewModel @Inject constructor(
     getBookshelfFolderUseCase: GetBookshelfFolderUseCase,
     private val scanBookshelfUseCase: ScanBookshelfUseCase,
     override val savedStateHandle: SavedStateHandle,
-) : PagingViewModel<File>(), SupportSafeArgs {
+) : FileListViewModel(manageFolderDisplaySettingsUseCase), SupportSafeArgs {
 
     private val args: FolderFragmentArgs by navArgs()
     var position = args.position
     override val transitionName = args.transitionName
 
     private val serverFolderFlow = getBookshelfFolderUseCase.execute(
-        GetBookshelfFolderUseCase.Request(
-            BookshelfId(args.serverId),
-            Base64.decode(args.path.encodeToByteArray(), Base64.URL_SAFE or Base64.NO_WRAP)
-                .decodeToString()
-        )
+        GetBookshelfFolderUseCase.Request(BookshelfId(args.serverId), args.path.decodeFromBase64())
     ).mapNotNull { it.dataOrNull }
 
     private val serverFlow = serverFolderFlow.map { it.bookshelf }.stateIn { null }
 
-    private val folderFlow = serverFolderFlow.map { it.folder }.stateIn { null }
+    val folderFlow = serverFolderFlow.map { it.folder }.stateIn { null }
 
     val titleFlow = serverFlow.mapNotNull { it?.displayName }.stateIn { "" }
 
@@ -65,17 +58,16 @@ internal class FolderViewModel @Inject constructor(
         )
     }.cachedIn(viewModelScope)
     var query = ""
-
-    val displayFlow =
-        manageFolderDisplaySettingsUseCase.settings.map { it.display }.distinctUntilChanged()
-    val spanCountFlow =
-        manageFolderDisplaySettingsUseCase.settings.map { it.rawSpanCount }.distinctUntilChanged()
+    var parent: String? = null
 
     val pagingQueryDataFlow = serverFolderFlow.flatMapLatest {
         pagingQueryFileUseCase.execute(
-            PagingQueryFileUseCase.Request(PagingConfig(100), it.bookshelf) {
-                query
-            }
+            PagingQueryFileUseCase.Request(
+                PagingConfig(100),
+                it.bookshelf,
+                { parent },
+                { query }
+            )
         )
     }.cachedIn(viewModelScope)
 

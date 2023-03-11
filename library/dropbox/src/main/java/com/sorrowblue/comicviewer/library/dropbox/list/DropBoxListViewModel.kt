@@ -1,28 +1,40 @@
 package com.sorrowblue.comicviewer.library.dropbox.list
 
-import android.app.Application
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
-import com.sorrowblue.comicviewer.domain.entity.file.File
-import com.sorrowblue.comicviewer.framework.ui.fragment.PagingAndroidViewModel
 import com.sorrowblue.comicviewer.framework.ui.navigation.SupportSafeArgs
 import com.sorrowblue.comicviewer.framework.ui.navigation.navArgs
 import com.sorrowblue.comicviewer.framework.ui.navigation.stateIn
 import com.sorrowblue.comicviewer.library.dropbox.data.DropBoxApiRepository
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOn
+import com.sorrowblue.comicviewer.library.filelist.LibraryFileListViewModel
 import kotlinx.coroutines.launch
 
 internal class DropBoxListViewModel(
-    application: Application,
+    private val repository: DropBoxApiRepository,
     override val savedStateHandle: SavedStateHandle
-) : PagingAndroidViewModel<File>(application), SupportSafeArgs {
+) : LibraryFileListViewModel(), SupportSafeArgs {
 
-    private val repository = DropBoxApiRepository.getInstance(application)
+    companion object {
+
+        fun Factory(repository: DropBoxApiRepository) = object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(
+                modelClass: Class<T>,
+                extras: CreationExtras
+            ): T {
+                // Create a SavedStateHandle for this ViewModel from extras
+                val savedStateHandle = extras.createSavedStateHandle()
+                return DropBoxListViewModel(repository, savedStateHandle) as T
+            }
+        }
+    }
 
     private val args: DropBoxListFragmentArgs by navArgs()
     override val transitionName = args.transitionName
@@ -30,11 +42,9 @@ internal class DropBoxListViewModel(
         DropBoxPagingSource(args.parent, repository)
     }.flow.cachedIn(viewModelScope)
 
-    val account = repository.accountFlow.stateIn { null }
+    override val isAuthenticated = repository.isAuthenticated
 
-    fun isAuthenticated(): Flow<Boolean> {
-        return repository.isAuthenticated().flowOn(Dispatchers.IO)
-    }
+    val account = repository.accountFlow.stateIn { null }
 
     fun signOut() {
         viewModelScope.launch {

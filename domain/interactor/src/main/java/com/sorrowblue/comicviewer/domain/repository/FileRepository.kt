@@ -29,6 +29,7 @@ interface FileRepository {
     fun pagingDataFlow(
         pagingConfig: PagingConfig,
         bookshelf: Bookshelf,
+        parent: () -> String?,
         query: () -> String
     ): Flow<PagingData<File>>
 

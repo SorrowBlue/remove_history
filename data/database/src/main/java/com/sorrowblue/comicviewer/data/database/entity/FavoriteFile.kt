@@ -23,7 +23,7 @@ import com.sorrowblue.comicviewer.data.common.favorite.FavoriteFileModel
             onDelete = ForeignKey.CASCADE
         )
     ],
-    indices = [Index(value = [FavoriteFile.FAVORITE_ID, FavoriteFile.FILE_PATH, FavoriteFile.BOOKSHELF_ID])]
+    indices = [Index(value = [FavoriteFile.FILE_PATH, FavoriteFile.BOOKSHELF_ID])]
 )
 internal data class FavoriteFile(
     @ColumnInfo(FAVORITE_ID) val favoriteId: Int,

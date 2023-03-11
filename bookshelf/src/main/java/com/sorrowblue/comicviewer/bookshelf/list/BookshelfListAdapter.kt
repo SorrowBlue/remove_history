@@ -11,7 +11,6 @@ import com.sorrowblue.comicviewer.bookshelf.databinding.BookshelfItemListBinding
 import com.sorrowblue.comicviewer.domain.entity.BookshelfFolder
 import com.sorrowblue.comicviewer.domain.entity.file.Folder
 import com.sorrowblue.comicviewer.folder.FolderFragmentArgs
-import com.sorrowblue.comicviewer.framework.ui.fragment.encodeBase64
 import com.sorrowblue.comicviewer.framework.ui.recyclerview.ViewBindingViewHolder
 
 internal class BookshelfListAdapter :
@@ -64,7 +63,7 @@ internal class BookshelfListAdapter :
             override val actionId = actionBookshelfListToFolder().actionId
             override val arguments = FolderFragmentArgs(
                 folder.bookshelfId.value,
-                folder.path.encodeBase64(),
+                folder.base64Path(),
                 transitionName
             ).toBundle()
 

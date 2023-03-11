@@ -5,10 +5,13 @@
 
     <data>
 
+        <variable
+            name="viewModel"
+            type="com.sorrowblue.comicviewer.library.filelist.LibraryFileListViewModel" />
     </data>
 
     <com.sorrowblue.comicviewer.framework.ui.NestedScrollCoordinatorLayout
-        android:id="@+id/nested_scroll_coordinator_layout"
+        android:id="@id/fragment_root"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -22,51 +25,8 @@
                 android:id="@id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:title="Google Drive" />
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/content_root"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <ImageView
-                    android:id="@+id/profile_image"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    tools:srcCompat="@tools:sample/avatars" />
-
-                <TextView
-                    android:id="@+id/display_name"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginEnd="16dp"
-                    android:layout_marginBottom="8dp"
-                    android:textAppearance="?attr/textAppearanceBodyLarge"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/sign_out"
-                    app:layout_constraintStart_toEndOf="@+id/profile_image"
-                    app:layout_constraintTop_toTopOf="parent"
-                    tools:text="@tools:sample/full_names" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/sign_out"
-                    style="?attr/materialIconButtonStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="16dp"
-                    app:icon="@drawable/ic_twotone_logout_24"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
+                app:menu="@menu/library_file_list"
+                tools:title="Cloud Service" />
         </com.google.android.material.appbar.AppBarLayout>
 
         <androidx.recyclerview.widget.RecyclerView
@@ -74,14 +34,19 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipToPadding="false"
+            android:orientation="vertical"
+            android:scrollbarStyle="outsideOverlay"
+            android:scrollbars="vertical"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            tools:listitem="@layout/library_item_file_list" />
 
         <com.google.android.material.progressindicator.LinearProgressIndicator
             android:id="@+id/progress_indicator"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:indeterminate="true"
+            app:isVisible="@{viewModel.isRefreshingFlow}"
             app:layout_behavior="@string/appbar_scrolling_view_behavior" />
     </com.sorrowblue.comicviewer.framework.ui.NestedScrollCoordinatorLayout>
 </layout>

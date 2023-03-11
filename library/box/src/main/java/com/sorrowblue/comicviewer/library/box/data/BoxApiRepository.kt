@@ -26,12 +26,8 @@ interface BoxApiRepository {
     @OptIn(ExperimentalSerializationApi::class)
     companion object {
 
-        private var instance: BoxApiRepository? = null
-
-        fun getInstance(context: Context) =
-            instance ?: BoxApiRepositoryImpl(context.boxConnectionStateDataStore).also {
-                instance = it
-            }
+        fun getInstance(context: Context): BoxApiRepository =
+            BoxApiRepositoryImpl(context.boxConnectionStateDataStore)
 
         private val Context.boxConnectionStateDataStore: DataStore<BoxConnectionState> by dataStore(
             fileName = "box_connection_state.pb", serializer = BoxConnectionState.Serializer()

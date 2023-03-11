@@ -1,5 +1,6 @@
 package com.sorrowblue.comicviewer.data.database
 
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
@@ -17,7 +18,10 @@ import com.sorrowblue.comicviewer.data.database.entity.ReadLaterFile
 
 @Database(
     entities = [Bookshelf::class, File::class, Favorite::class, FavoriteFile::class, ReadLaterFile::class],
-    version = 1
+    version = 2,
+    autoMigrations = [
+        AutoMigration(1, 2)
+    ]
 )
 @TypeConverters(PasswordConverters::class)
 internal abstract class ComicViewerDatabase : RoomDatabase() {

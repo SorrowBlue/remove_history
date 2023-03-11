@@ -1,6 +1,5 @@
 package com.sorrowblue.comicviewer.data.coil.folder
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
@@ -28,7 +27,6 @@ import com.sorrowblue.comicviewer.data.remote.reader.FileReader
 import com.sorrowblue.comicviewer.domain.entity.settings.FolderThumbnailOrder
 import com.sorrowblue.comicviewer.domain.model.SupportExtension
 import com.sorrowblue.comicviewer.domain.repository.SettingsCommonRepository
-import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import kotlin.math.floor
 import kotlinx.coroutines.NonCancellable
@@ -42,7 +40,6 @@ internal class FolderThumbnailFetcher(
     private val folder: FileModel.Folder,
     options: Options,
     diskCache: dagger.Lazy<DiskCache?>,
-    private val context: Context,
     private val remoteDataSourceFactory: RemoteDataSource.Factory,
     private val bookshelfLocalDataSource: BookshelfLocalDataSource,
     private val fileModelLocalDataSource: FileModelLocalDataSource,
@@ -84,7 +81,7 @@ internal class FolderThumbnailFetcher(
                 }
             }
             try {
-                var thumbnails = cacheList(size, folderThumbnailOrder)
+                val thumbnails = cacheList(size, folderThumbnailOrder)
                 if (thumbnails.isEmpty()) {
                     // キャッシュがない場合、取得する。
                     val bookshelfModel =
@@ -96,7 +93,7 @@ internal class FolderThumbnailFetcher(
                     snapshot = remoteDataSourceFactory.create(bookshelfModel)
                         .listFiles(folder, false) { SortUtil.filter(it, supportExtensions) }
                         .firstOrNull { it is FileModel.File }?.let {
-                            var fileReader =
+                            val fileReader =
                                 remoteDataSourceFactory.create(bookshelfModel).fileReader(it)
                                     ?: throw RuntimeException("FileReaderが取得できない")
                             val bitmap = fileReader.thumbnailBitmap(
@@ -287,7 +284,6 @@ internal class FolderThumbnailFetcher(
 
     class Factory @Inject constructor(
         @ThumbnailDiskCache private val diskCache: dagger.Lazy<DiskCache?>,
-        @ApplicationContext private val context: Context,
         private val remoteDataSourceFactory: RemoteDataSource.Factory,
         private val bookshelfLocalDataSource: BookshelfLocalDataSource,
         private val fileModelLocalDataSource: FileModelLocalDataSource,
@@ -301,7 +297,6 @@ internal class FolderThumbnailFetcher(
                 data,
                 options,
                 diskCache,
-                context,
                 remoteDataSourceFactory,
                 bookshelfLocalDataSource,
                 fileModelLocalDataSource,

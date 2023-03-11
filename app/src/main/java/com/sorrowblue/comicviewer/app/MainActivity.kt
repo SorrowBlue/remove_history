@@ -1,6 +1,7 @@
 package com.sorrowblue.comicviewer.app
 
 import android.content.Context
+import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -45,6 +46,8 @@ internal class MainActivity : AppCompatActivity(R.layout.activity_main) {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        logcat("Configuration") { "screenWidthDp=${resources.configuration.screenWidthDp}" }
+        logcat("Configuration") { "orientation=${if (Configuration.ORIENTATION_LANDSCAPE == resources.configuration.orientation) "LANDSCAPE" else "PORTRAIT"}" }
         val splashScreen = installSplashScreen()
         DynamicColors.applyToActivityIfAvailable(this)
         super.onCreate(savedInstanceState)
@@ -73,6 +76,10 @@ internal class MainActivity : AppCompatActivity(R.layout.activity_main) {
             }
         }
         binding.bottomNavigation.setupWithNavController(navController)
+        commonViewModel.isVisibleBottomNav.onEach {
+            logcat { "bottomNavigation=$it" }
+            binding.bottomNavigation.isShown(it)
+        }.launchInWithLifecycle()
         navController.addOnDestinationChangedListener { _, destination, _ ->
             if (destination is FrameworkFragmentNavigator.Destination) {
                 binding.bottomNavigation.isShown(destination.isVisibleBottomNavigation)

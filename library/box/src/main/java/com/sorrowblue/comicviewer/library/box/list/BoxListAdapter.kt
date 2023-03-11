@@ -1,55 +1,24 @@
 package com.sorrowblue.comicviewer.library.box.list
 
 import android.view.ViewGroup
-import androidx.navigation.findNavController
-import androidx.paging.PagingDataAdapter
-import androidx.recyclerview.widget.DiffUtil
 import coil.load
 import com.sorrowblue.comicviewer.domain.entity.file.Book
 import com.sorrowblue.comicviewer.domain.entity.file.File
 import com.sorrowblue.comicviewer.domain.entity.file.Folder
-import com.sorrowblue.comicviewer.framework.ui.recyclerview.ViewBindingViewHolder
-import com.sorrowblue.comicviewer.library.databinding.LibraryItemListBinding
-import logcat.logcat
+import com.sorrowblue.comicviewer.library.filelist.LibraryFileListAdapter
 
-internal class BoxListAdapter(private val download: (Book) -> Unit) :
-    PagingDataAdapter<File, BoxListAdapter.ViewHolder>(
-        object : DiffUtil.ItemCallback<File>() {
-            override fun areItemsTheSame(oldItem: File, newItem: File) =
-                oldItem.bookshelfId == newItem.bookshelfId && oldItem.path == newItem.path
+internal class BoxListAdapter(download: (Book) -> Unit, folder: (Folder) -> Unit) :
+    LibraryFileListAdapter(download, folder) {
 
-            override fun areContentsTheSame(oldItem: File, newItem: File) = oldItem == newItem
-        }
-    ) {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = ViewHolder(parent)
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        return ViewHolder(parent)
-    }
-
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        getItem(position)?.let {
-            holder.bind(it)
-        }
-    }
-
-    inner class ViewHolder(parent: ViewGroup) :
-        ViewBindingViewHolder<LibraryItemListBinding>(
-            parent,
-            LibraryItemListBinding::inflate
-        ) {
-        fun bind(file: File) {
-            logcat { file.params["thumbnail"].orEmpty() }
-            binding.icon.load(file.params["thumbnail"]) {
-                addHeader("Authorization", "Bearer ${file.params["access_token"]}")
-            }
-            binding.name.text = file.name
-            binding.size.text = "${file.size} B"
-            binding.root.setOnClickListener {
-                when (file) {
-                    is Book -> download(file)
-                    is Folder ->
-                        it.findNavController()
-                            .navigate(BoxListFragmentDirections.actionBoxListSelf(file.path))
+    inner class ViewHolder(parent: ViewGroup) : LibraryFileListAdapter.ViewHolder(parent) {
+        override fun bind(file: File) {
+            if (file is Folder) {
+                binding.icon.setImageResource(com.sorrowblue.comicviewer.framework.resource.R.drawable.ic_twotone_folder_open_24)
+            } else {
+                binding.icon.load(file.params["thumbnail"]) {
+                    addHeader("Authorization", "Bearer ${file.params["access_token"]}")
                 }
             }
         }

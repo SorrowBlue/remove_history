@@ -48,13 +48,15 @@
 
     <style name="ComicViewerPreferenceThemeOverlay" parent="PreferenceThemeOverlay">
         <item name="android:layout">@layout/fragment_list_material</item>
-        <item name="switchPreferenceCompatStyle">@style/Preference.SwitchPreferenceCompat.Catalog</item>
+        <item name="switchPreferenceCompatStyle">@style/Preference.SwitchPreferenceCompat.Catalog
+        </item>
         <item name="checkBoxPreferenceStyle">@style/Preference.CheckBoxPreference.Catalog</item>
     </style>
 
     <style name="Preference.SwitchPreferenceCompat.Catalog" parent="Preference.SwitchPreferenceCompat.Material">
         <item name="android:widgetLayout">@layout/widget_switch_material</item>
     </style>
+
     <style name="Preference.CheckBoxPreference.Catalog" parent="Preference.CheckBoxPreference.Material">
         <item name="android:widgetLayout">@layout/widget_checkbox_material</item>
     </style>
@@ -62,5 +64,10 @@
     <style name="ShapeAppearance.Example.PILL" parent="">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">12dp</item>
+    </style>
+
+    <style name="ShapeAppearanceOverlay.ComicViewer.Circle" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
     </style>
 </resources>

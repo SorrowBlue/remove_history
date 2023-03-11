@@ -21,6 +21,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavDeepLinkBuilder
 import androidx.navigation.NavDirections
+import androidx.navigation.fragment.FragmentNavigator
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.onNavDestinationSelected
 import androidx.paging.LoadState
@@ -36,14 +37,12 @@ import com.sorrowblue.comicviewer.domain.entity.file.Folder
 import com.sorrowblue.comicviewer.domain.entity.settings.FolderDisplaySettings
 import com.sorrowblue.comicviewer.domain.model.ScanType
 import com.sorrowblue.comicviewer.file.info.FileInfoNavigation
+import com.sorrowblue.comicviewer.file.list.FileListAdapter
+import com.sorrowblue.comicviewer.file.list.FileListFragment
 import com.sorrowblue.comicviewer.folder.databinding.FolderFragmentBinding
 import com.sorrowblue.comicviewer.framework.ui.flow.attachAdapter
-import com.sorrowblue.comicviewer.framework.ui.flow.launchInWithLifecycle
 import com.sorrowblue.comicviewer.framework.ui.fragment.CommonViewModel
-import com.sorrowblue.comicviewer.framework.ui.fragment.PagingFragment
-import com.sorrowblue.comicviewer.framework.ui.fragment.encodeBase64
 import com.sorrowblue.comicviewer.framework.ui.fragment.type
-import com.sorrowblue.comicviewer.framework.ui.widget.ktx.setSpanCount
 import com.sorrowblue.jetpack.binding.viewBinding
 import dagger.hilt.android.AndroidEntryPoint
 import dev.chrisbanes.insetter.applyInsetter
@@ -52,47 +51,42 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.mapNotNull
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import logcat.logcat
 
 @AndroidEntryPoint
-internal class FolderFragment : PagingFragment<File>(R.layout.folder_fragment),
+internal class FolderFragment : FileListFragment(R.layout.folder_fragment),
     Toolbar.OnMenuItemClickListener {
 
     private val binding: FolderFragmentBinding by viewBinding()
     private val commonViewModel: CommonViewModel by activityViewModels()
     override val viewModel: FolderViewModel by viewModels()
 
-    override val adapter
-        get() = FolderAdapter(
-            runBlocking { viewModel.displayFlow.first() },
-            { file, transitionName, extras ->
-                when (file) {
-                    is Book -> navigate(
-                        FolderFragmentDirections.actionFolderToBook(file, transitionName),
-                        extras
-                    )
+    override fun navigateToFile(
+        file: File,
+        transitionName: String,
+        extras: FragmentNavigator.Extras
+    ) {
+        when (file) {
+            is Book -> navigate(
+                FolderFragmentDirections.actionFolderToBook(file, transitionName),
+                extras
+            )
 
-                    is Folder -> navigate(
-                        FolderFragmentDirections.actionFolderSelf(
-                            file.bookshelfId.value,
-                            file.path.encodeBase64(),
-                            transitionName
-                        ),
-                        extras
-                    )
-                }
-            },
-            { navigate(FileInfoNavigation.getDeeplink(it)) }
-        )
+            is Folder -> navigate(
+                FolderFragmentDirections.actionFolderSelf(
+                    file.bookshelfId.value,
+                    file.base64Path(),
+                    transitionName
+                ),
+                extras
+            )
+        }
+    }
 
     override fun onCreateAdapter(pagingDataAdapter: PagingDataAdapter<File, *>) {
         super.onCreateAdapter(pagingDataAdapter)
-        check(pagingDataAdapter is FolderAdapter)
-        viewModel.displayFlow.onEach(pagingDataAdapter::setDisplay).launchInWithLifecycle()
-        viewModel.spanCountFlow.onEach(binding.recyclerView::setSpanCount).launchInWithLifecycle()
-
         viewLifecycleOwner.lifecycleScope.launch {
             pagingDataAdapter.loadStateFlow.mapNotNull { it.refresh as? LoadState.Error }
                 .distinctUntilChanged()
@@ -125,24 +119,22 @@ internal class FolderFragment : PagingFragment<File>(R.layout.folder_fragment),
 
         binding.viewModel = viewModel
 
-        binding.toolbar.setupWithNavController()
         binding.toolbar.setOnLongClickListener {
             findNavController().popBackStack(R.id.folder_navigation, true)
             true
         }
         binding.toolbar.setOnMenuItemClickListener(this)
-        binding.toolbar.applyInsetter {
-            type(systemBars = true, displayCutout = true) {
-                padding(horizontal = true)
-                margin(top = true)
-            }
-        }
-        binding.recyclerView.applyInsetter {
+        setupSearchAdapter()
+        binding.searchRecyclerView.applyInsetter {
             type(systemBars = true, displayCutout = true) {
                 padding(horizontal = true, bottom = true)
             }
         }
-        setupSearchAdapter()
+        binding.searchFilter.applyInsetter {
+            type(systemBars = true, displayCutout = true) {
+                padding(horizontal = true)
+            }
+        }
     }
 
     override fun onMenuItemClick(item: MenuItem): Boolean {
@@ -173,15 +165,16 @@ internal class FolderFragment : PagingFragment<File>(R.layout.folder_fragment),
         transitionName: String
     ) = object : NavDirections {
         override val actionId = actionFolderToBook().actionId
-        override val arguments = BookFragmentArgs(
-            book.bookshelfId.value,
-            book.path.encodeBase64(),
-            transitionName,
-            book.lastPageRead
-        ).toBundle()
+        override val arguments = BookFragmentArgs(book,transitionName).toBundle()
     }
 
     private fun setupSearchAdapter() {
+        val searchAdapter = FileListAdapter(
+            FolderDisplaySettings.Display.LIST,
+            runBlocking { viewModel.isEnabledThumbnailFlow.first() },
+            { file, transitionName, extras -> navigateToFile(file, transitionName, extras) },
+            { navigate(FileInfoNavigation.getDeeplink(it)) }
+        )
         val callback = requireActivity().onBackPressedDispatcher.addCallback(
             viewLifecycleOwner,
             binding.searchView.currentTransitionState == SearchView.TransitionState.SHOWING || binding.searchView.currentTransitionState == SearchView.TransitionState.SHOWN
@@ -190,37 +183,35 @@ internal class FolderFragment : PagingFragment<File>(R.layout.folder_fragment),
                 binding.searchView.hide()
             }
         }
+        binding.searchFilter.setOnCheckedStateChangeListener { _, checkedIds ->
+            if (checkedIds.contains(R.id.search_filter_only_folder)) {
+                if (viewModel.parent != viewModel.folderFlow.value!!.path) {
+                    viewModel.parent = viewModel.folderFlow.value!!.path
+                    searchAdapter.refresh()
+                }
+            } else {
+                if (viewModel.parent != null) {
+                    viewModel.parent = null
+                    searchAdapter.refresh()
+                }
+            }
+        }
         binding.searchView.addTransitionListener { _, _, newState ->
+            if (newState == SearchView.TransitionState.HIDDEN) {
+                commonViewModel.isVisibleBottomNav.tryEmit(true)
+            } else if(newState == SearchView.TransitionState.SHOWN){
+                commonViewModel.isVisibleBottomNav.tryEmit(false)
+            }
             callback.isEnabled =
                 newState == SearchView.TransitionState.SHOWING || newState == SearchView.TransitionState.SHOWN
         }
-        val adapter = FolderAdapter(
-            FolderDisplaySettings.Display.LIST,
-            { file, transitionName, extras ->
-                when (file) {
-                    is Book -> navigate(
-                        FolderFragmentDirections.actionFolderToBook(file, transitionName),
-                        extras
-                    )
-
-                    is Folder -> navigate(
-                        FolderFragmentDirections.actionFolderSelf(
-                            file.bookshelfId.value,
-                            file.path.encodeBase64(),
-                            transitionName
-                        ), extras
-                    )
-                }
-            },
-            { navigate(FileInfoNavigation.getDeeplink(it)) }
-        )
-        viewModel.pagingQueryDataFlow.attachAdapter(adapter)
-        binding.searchRecyclerView.adapter = adapter
+        viewModel.pagingQueryDataFlow.attachAdapter(searchAdapter)
+        binding.searchRecyclerView.adapter = searchAdapter
         binding.searchView.editText.doAfterTextChanged { editable ->
             editable?.toString()?.let {
                 if (viewModel.query != it) {
                     viewModel.query = it
-                    adapter.refresh()
+                    searchAdapter.refresh()
                 }
             }
         }

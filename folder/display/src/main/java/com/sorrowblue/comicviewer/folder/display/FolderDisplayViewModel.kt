@@ -6,6 +6,7 @@ import com.sorrowblue.comicviewer.domain.entity.settings.FolderDisplaySettings
 import com.sorrowblue.comicviewer.domain.usecase.settings.ManageFolderDisplaySettingsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
@@ -20,9 +21,9 @@ internal class FolderDisplayViewModel @Inject constructor(
         }
     }
 
-    fun update(spanCount: Int) {
+    fun update(size: FolderDisplaySettings.Size) {
         viewModelScope.launch {
-            manageFolderDisplaySettingsUseCase.edit { it.copy(spanCount = spanCount) }
+            manageFolderDisplaySettingsUseCase.edit { it.copy(columnSize = size) }
         }
     }
 
@@ -38,11 +39,12 @@ internal class FolderDisplayViewModel @Inject constructor(
         }
     }
 
-    val displayFlow = manageFolderDisplaySettingsUseCase.settings.map { it.display }
-
-    val spanCountFlow = manageFolderDisplaySettingsUseCase.settings.map { it.spanCount }
-
-    val sortFlow = manageFolderDisplaySettingsUseCase.settings.map { it.sort }
-
-    val orderFlow = manageFolderDisplaySettingsUseCase.settings.map { it.order }
+    val displayFlow =
+        manageFolderDisplaySettingsUseCase.settings.map { it.display }.distinctUntilChanged()
+    val columnSizeFlow =
+        manageFolderDisplaySettingsUseCase.settings.map { it.columnSize }.distinctUntilChanged()
+    val sortFlow =
+        manageFolderDisplaySettingsUseCase.settings.map { it.sort }.distinctUntilChanged()
+    val orderFlow =
+        manageFolderDisplaySettingsUseCase.settings.map { it.order }.distinctUntilChanged()
 }

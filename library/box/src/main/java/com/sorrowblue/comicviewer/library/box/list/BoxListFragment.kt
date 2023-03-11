@@ -1,41 +1,28 @@
 package com.sorrowblue.comicviewer.library.box.list
 
-import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.navGraphViewModels
 import com.sorrowblue.comicviewer.domain.entity.file.File
 import com.sorrowblue.comicviewer.framework.notification.ChannelID
 import com.sorrowblue.comicviewer.framework.ui.flow.launchInWithLifecycle
-import com.sorrowblue.comicviewer.framework.ui.fragment.PagingFragment
-import com.sorrowblue.comicviewer.framework.ui.fragment.type
-import com.sorrowblue.comicviewer.library.databinding.LibraryFragmentCloudBinding
-import com.sorrowblue.jetpack.binding.viewBinding
-import dev.chrisbanes.insetter.applyInsetter
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filterNot
+import com.sorrowblue.comicviewer.library.filelist.LibraryFileListFragment
 import kotlinx.coroutines.flow.onEach
 
-internal class BoxListFragment :
-    PagingFragment<File>(com.sorrowblue.comicviewer.library.R.layout.library_fragment_cloud) {
+internal class BoxListFragment : LibraryFileListFragment() {
 
-    private val binding: LibraryFragmentCloudBinding by viewBinding()
-    override val viewModel: BoxListViewModel by viewModels()
+    private val boxApiViewModel: BoxApiViewModel by navGraphViewModels(com.sorrowblue.comicviewer.library.R.id.box_navigation)
 
+    override val viewModel: BoxListViewModel by viewModels {
+        BoxListViewModel.Factory(boxApiViewModel.repository)
+    }
     override val adapter
-        get() = BoxListAdapter {
-            val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
-            intent.addCategory(Intent.CATEGORY_OPENABLE)
-            intent.putExtra(Intent.EXTRA_TITLE, it.name)
-            intent.type = "*/*"
-            file = it
-            createFileRequest.launch(intent)
+        get() = BoxListAdapter(::createFile) {
+            navigate(BoxListFragmentDirections.actionBoxListSelf(it.path))
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,34 +40,23 @@ internal class BoxListFragment :
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        appBarConfiguration = AppBarConfiguration(setOf())
-        binding.toolbar.setupWithNavController()
-        binding.toolbar.applyInsetter {
-            type(systemBars = true, displayCutout = true) {
-                padding(horizontal = true)
-                margin(top = true)
+        viewModel.userInfoFlow.onEach {
+            profileImage.load("https://api.box.com/2.0/users/${it?.id}/avatar") {
+                addHeader("Authorization", "Bearer ${viewModel.accessToken()}")
+                error(com.sorrowblue.comicviewer.framework.resource.R.drawable.ic_twotone_broken_image_24)
             }
-        }
-
-        binding.recyclerView.applyInsetter {
-            type(systemBars = true, displayCutout = true) {
-                padding(horizontal = true, bottom = true)
-            }
-        }
-
-        binding.signOut.setOnClickListener {
-            viewModel.signOut()
-        }
-        viewModel.isAuthenticated().distinctUntilChanged().filterNot { it }.onEach {
-            findNavController().navigate(BoxListFragmentDirections.actionBoxListToBoxSignin())
         }.launchInWithLifecycle()
     }
 
-    private lateinit var file: File
+    override fun navigateToProfile() {
+        navigate(BoxListFragmentDirections.actionBoxListToBoxProfile())
+    }
 
-    private val createFileRequest =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            if (it.resultCode == Activity.RESULT_OK && it.data?.data != null) {
-            }
-        }
+    override fun navigateToSignIn() {
+        findNavController().navigate(BoxListFragmentDirections.actionBoxListToBoxSignin())
+    }
+
+    override fun enqueueDownload(outputUri: String, file: File) {
+        TODO("Not yet implemented")
+    }
 }

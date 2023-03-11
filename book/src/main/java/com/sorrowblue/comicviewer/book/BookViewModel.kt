@@ -3,6 +3,7 @@ package com.sorrowblue.comicviewer.book
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.sorrowblue.comicviewer.domain.Base64.decodeFromBase64
 import com.sorrowblue.comicviewer.domain.entity.bookshelf.BookshelfId
 import com.sorrowblue.comicviewer.domain.entity.settings.History
 import com.sorrowblue.comicviewer.domain.usecase.GetNextComicRel
@@ -11,7 +12,6 @@ import com.sorrowblue.comicviewer.domain.usecase.file.GetBookUseCase
 import com.sorrowblue.comicviewer.domain.usecase.file.GetNextBookUseCase
 import com.sorrowblue.comicviewer.domain.usecase.file.UpdateLastReadPageUseCase
 import com.sorrowblue.comicviewer.domain.usecase.settings.ManageViewerSettingsUseCase
-import com.sorrowblue.comicviewer.framework.ui.fragment.decodeBase64
 import com.sorrowblue.comicviewer.framework.ui.navigation.SupportSafeArgs
 import com.sorrowblue.comicviewer.framework.ui.navigation.navArgs
 import com.sorrowblue.comicviewer.framework.ui.navigation.stateIn
@@ -45,7 +45,7 @@ internal class BookViewModel @Inject constructor(
     val placeholder = args.placeholder
 
     val bookFlow =
-        getBookUseCase.execute(GetBookUseCase.Request(BookshelfId(args.serverId), args.path.decodeBase64()))
+        getBookUseCase.execute(GetBookUseCase.Request(BookshelfId(args.serverId), args.path.decodeFromBase64()))
             .map { it.dataOrNull }
             .stateIn { null }
 

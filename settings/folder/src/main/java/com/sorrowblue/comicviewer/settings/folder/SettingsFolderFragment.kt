@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.onEach
 internal class SettingsFolderBinding(fragment: FrameworkPreferenceFragment) :
     FrameworkPreferenceBinding(fragment) {
 
+    val resolveImageFolder: SwitchPreferenceCompat by preference(R.string.settings_folder_prefkey_resolve_image_folder)
     val showPreview: SwitchPreferenceCompat by preference(R.string.settings_folder_preference_key_show_preview)
     val supportExtension: Preference by preference(R.string.settings_folder_preference_key_support_extension)
 }
@@ -38,11 +39,15 @@ internal class SettingsFolderFragment :
             true
         }
 
-        viewModel.settings.map { it.showPreview }.distinctUntilChanged()
-            .onEach(binding.showPreview::setChecked)
-            .launchInWithLifecycle()
+        viewModel.showPreview.onEach(binding.showPreview::setChecked).launchInWithLifecycle()
         binding.showPreview.setOnPreferenceChangeListener<Boolean> { _, newValue ->
             viewModel.updateShowPreview(newValue)
+            false
+        }
+
+        viewModel.resolveImageFolder.onEach(binding.resolveImageFolder::setChecked).launchInWithLifecycle()
+        binding.resolveImageFolder.setOnPreferenceChangeListener<Boolean> { _, newValue ->
+            viewModel.updateResolveImageFolder(newValue)
             false
         }
     }

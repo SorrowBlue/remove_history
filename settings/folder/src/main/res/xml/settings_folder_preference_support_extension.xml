@@ -4,8 +4,7 @@
     <PreferenceCategory
         app:key="@string/settings_folder_prefkey_archive"
         app:title="アーカイブ" />
-    <com.sorrowblue.comicviewer.settings.folder.supportextension.PreferenceCategoryButton
-        app:layout="@layout/settings_folder_btn"
+    <PreferenceCategory
         app:key="@string/settings_folder_prefkey_document"
         app:title="ドキュメント" />
 </PreferenceScreen>

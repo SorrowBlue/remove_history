@@ -5,30 +5,25 @@ import android.os.Bundle
 import android.view.View
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.view.isVisible
-import androidx.navigation.ui.AppBarConfiguration
 import com.box.sdk.BoxAPIConnection
 import com.sorrowblue.comicviewer.framework.ui.fragment.FrameworkFragment
 import com.sorrowblue.comicviewer.framework.ui.fragment.type
-import com.sorrowblue.comicviewer.library.databinding.LibraryFragmentSigninBinding
+import com.sorrowblue.comicviewer.library.box.R
+import com.sorrowblue.comicviewer.library.box.databinding.BoxFragmentSigninBinding
 import com.sorrowblue.jetpack.binding.viewBinding
 import dev.chrisbanes.insetter.applyInsetter
 import java.net.URI
 import kotlin.random.Random
 
-internal class BoxSignInFragment :
-    FrameworkFragment(com.sorrowblue.comicviewer.library.R.layout.library_fragment_signin) {
+internal class BoxSignInFragment : FrameworkFragment(R.layout.box_fragment_signin) {
 
-    private val binding: LibraryFragmentSigninBinding by viewBinding()
+    private val binding: BoxFragmentSigninBinding by viewBinding()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        appBarConfiguration = AppBarConfiguration(setOf())
-        binding.toolbar.setupWithNavController()
-        binding.toolbar.applyInsetter {
+        binding.root.applyInsetter {
             type(systemBars = true, displayCutout = true) {
-                padding(horizontal = true)
-                margin(top = true)
+                padding()
             }
         }
 
@@ -40,11 +35,9 @@ internal class BoxSignInFragment :
                 state,
                 null
             )
-
             val builder = CustomTabsIntent.Builder()
             val customTabsIntent = builder.build()
             customTabsIntent.launchUrl(requireContext(), Uri.parse(url.toString()))
         }
-        binding.signIn.isVisible = true
     }
 }

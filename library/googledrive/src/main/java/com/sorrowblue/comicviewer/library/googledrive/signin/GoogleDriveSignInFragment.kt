@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.ui.AppBarConfiguration
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
@@ -14,26 +13,17 @@ import com.google.android.gms.tasks.RuntimeExecutionException
 import com.google.android.material.snackbar.Snackbar
 import com.google.api.services.drive.DriveScopes
 import com.sorrowblue.comicviewer.framework.ui.fragment.FrameworkFragment
-import com.sorrowblue.comicviewer.framework.ui.fragment.type
-import com.sorrowblue.comicviewer.library.R
-import com.sorrowblue.comicviewer.library.databinding.LibraryFragmentSigninBinding
+import com.sorrowblue.comicviewer.library.googledrive.R
+import com.sorrowblue.comicviewer.library.googledrive.databinding.GoogledriveFragmentSigninBinding
 import com.sorrowblue.jetpack.binding.viewBinding
-import dev.chrisbanes.insetter.applyInsetter
 
-internal class GoogleDriveSignInFragment : FrameworkFragment(R.layout.library_fragment_signin) {
+internal class GoogleDriveSignInFragment :
+    FrameworkFragment(R.layout.googledrive_fragment_signin) {
 
-    private val binding: LibraryFragmentSigninBinding by viewBinding()
+    private val binding: GoogledriveFragmentSigninBinding by viewBinding()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        appBarConfiguration = AppBarConfiguration(setOf())
-        binding.toolbar.setupWithNavController()
-        binding.toolbar.applyInsetter {
-            type(systemBars = true, displayCutout = true) {
-                padding(horizontal = true)
-                margin(top = true)
-            }
-        }
 
         binding.signIn.setOnClickListener {
             val googleSignInOptions =
