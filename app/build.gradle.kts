@@ -1,6 +1,11 @@
 @file:Suppress("DSL_SCOPE_VIOLATION", "UnstableApiUsage")
 
 import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+import com.sorrowblue.buildlogic.debug
+import com.sorrowblue.buildlogic.internal
+import com.sorrowblue.buildlogic.prerelease
+import com.sorrowblue.buildlogic.projectString
+import com.sorrowblue.buildlogic.release
 import org.jetbrains.kotlin.konan.properties.propertyString
 
 plugins {
@@ -25,33 +30,33 @@ android {
     }
 
     signingConfigs {
-        getByName("debug") {
+        release {
+            storeFile =
+                file(gradleLocalProperties(rootDir).propertyString("release.storeFile").orEmpty())
+            storePassword = gradleLocalProperties(rootDir).propertyString("release.storePassword")
+            keyAlias = gradleLocalProperties(rootDir).propertyString("release.keyAlias")
+            keyPassword = gradleLocalProperties(rootDir).propertyString("release.keyPassword")
+        }
+        prerelease {
+            storeFile =
+                file(gradleLocalProperties(rootDir).propertyString("release.storeFile").orEmpty())
+            storePassword = gradleLocalProperties(rootDir).propertyString("release.storePassword")
+            keyAlias = gradleLocalProperties(rootDir).propertyString("release.keyAlias")
+            keyPassword = gradleLocalProperties(rootDir).propertyString("release.keyPassword")
+        }
+        internal {
+            storeFile =
+                file(gradleLocalProperties(rootDir).propertyString("release.storeFile").orEmpty())
+            storePassword = gradleLocalProperties(rootDir).propertyString("release.storePassword")
+            keyAlias = gradleLocalProperties(rootDir).propertyString("release.keyAlias")
+            keyPassword = gradleLocalProperties(rootDir).propertyString("release.keyPassword")
+        }
+        debug {
             storeFile =
                 file(gradleLocalProperties(rootDir).propertyString("debug.storeFile").orEmpty())
             storePassword = gradleLocalProperties(rootDir).propertyString("debug.storePassword")
             keyAlias = gradleLocalProperties(rootDir).propertyString("debug.keyAlias")
             keyPassword = gradleLocalProperties(rootDir).propertyString("debug.keyPassword")
-        }
-        create("release") {
-            storeFile =
-                file(gradleLocalProperties(rootDir).propertyString("release.storeFile").orEmpty())
-            storePassword = gradleLocalProperties(rootDir).propertyString("release.storePassword")
-            keyAlias = gradleLocalProperties(rootDir).propertyString("release.keyAlias")
-            keyPassword = gradleLocalProperties(rootDir).propertyString("release.keyPassword")
-        }
-        create("prerelease") {
-            storeFile =
-                file(gradleLocalProperties(rootDir).propertyString("release.storeFile").orEmpty())
-            storePassword = gradleLocalProperties(rootDir).propertyString("release.storePassword")
-            keyAlias = gradleLocalProperties(rootDir).propertyString("release.keyAlias")
-            keyPassword = gradleLocalProperties(rootDir).propertyString("release.keyPassword")
-        }
-        create("internal") {
-            storeFile =
-                file(gradleLocalProperties(rootDir).propertyString("release.storeFile").orEmpty())
-            storePassword = gradleLocalProperties(rootDir).propertyString("release.storePassword")
-            keyAlias = gradleLocalProperties(rootDir).propertyString("release.keyAlias")
-            keyPassword = gradleLocalProperties(rootDir).propertyString("release.keyPassword")
         }
     }
 
@@ -63,14 +68,14 @@ android {
             )
             signingConfig = signingConfigs.getByName("release")
         }
-        create("prerelease") {
+        prerelease {
             isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
             )
             signingConfig = signingConfigs.getByName("prerelease")
         }
-        create("internal") {
+        internal {
             isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
@@ -92,12 +97,12 @@ android {
     }
 
     dynamicFeatures += setOf(
-        ":data:reader:document",
-        ":data:reader:zip",
-        ":library:googledrive",
-        ":library:onedrive",
-        ":library:dropbox",
-        ":library:box"
+        projects.data.reader.document.projectString(),
+        projects.data.reader.zip.projectString(),
+        projects.library.box.projectString(),
+        projects.library.dropbox.projectString(),
+        projects.library.googledrive.projectString(),
+        projects.library.onedrive.projectString(),
     )
 }
 
