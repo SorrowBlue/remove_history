@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.android.library) apply false
     alias(libs.plugins.kotlin.android) apply false
+    kotlin("multiplatform") version "1.8.10" apply false
     alias(libs.plugins.kotlin.kapt) apply false
     alias(libs.plugins.kotlin.plugin.parcelize) apply false
     alias(libs.plugins.kotlin.plugin.serialization) apply false

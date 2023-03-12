@@ -21,5 +21,9 @@ gradlePlugin {
             id = "build-logic.android.dynamic-feature"
             implementationClass = "com.sorrowblue.buildlogic.AndroidDynamicFeaturePlugin"
         }
+        register("com.sorrowblue.dagger-hilt") {
+            id = "com.sorrowblue.dagger-hilt"
+            implementationClass = "com.sorrowblue.buildlogic.AndroidDaggerHiltPlugin"
+        }
     }
 }

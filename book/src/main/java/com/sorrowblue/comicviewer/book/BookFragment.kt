@@ -111,7 +111,7 @@ internal class BookFragment : FrameworkFragment(R.layout.book_fragment) {
             WindowInsetsControllerCompat(requireActivity().window, binding.root)
         windowInsetsController.show(WindowInsetsCompat.Type.systemBars())
         windowInsetsController.systemBarsBehavior =
-            WindowInsetsControllerCompat.BEHAVIOR_SHOW_BARS_BY_TOUCH
+            WindowInsetsControllerCompat.BEHAVIOR_DEFAULT
 
         val window = requireActivity().window
         window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)

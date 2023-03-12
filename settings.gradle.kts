@@ -1,3 +1,5 @@
+import com.android.build.api.dsl.SettingsExtension
+
 enableFeaturePreview("STABLE_CONFIGURATION_CACHE")
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
@@ -17,7 +19,15 @@ pluginManagement {
 }
 
 plugins {
-    id("org.gradle.toolchains.foojay-resolver-convention") version("0.4.0")
+    id("org.gradle.toolchains.foojay-resolver-convention") version ("0.4.0")
+    id("com.android.settings") version "7.4.2"
+}
+
+@Suppress("UnstableApiUsage")
+extensions.configure<SettingsExtension> {
+    buildToolsVersion = "33.0.2"
+    compileSdk = 33
+    minSdk = 28
 }
 
 @Suppress("UnstableApiUsage")
@@ -32,7 +42,8 @@ dependencyResolutionManagement {
         maven { url = uri("https://jitpack.io/") }
 
         maven {
-            url = uri("https://pkgs.dev.azure.com/MicrosoftDeviceSDK/DuoSDK-Public/_packaging/Duo-SDK-Feed/maven/v1")
+            url =
+                uri("https://pkgs.dev.azure.com/MicrosoftDeviceSDK/DuoSDK-Public/_packaging/Duo-SDK-Feed/maven/v1")
         }
     }
 }
