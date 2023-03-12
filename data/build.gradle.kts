@@ -1,8 +1,7 @@
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     id("build-logic.android.library")
-    alias(libs.plugins.kotlin.kapt)
-    alias(libs.plugins.dagger.hilt.android)
+    id("com.sorrowblue.dagger-hilt")
     alias(libs.plugins.kotlin.plugin.serialization)
 }
 
@@ -19,11 +18,4 @@ dependencies {
     implementation(libs.coil)
     implementation(libs.kotlinx.serialization.protobuf)
     implementation(libs.androidx.exifinterface)
-
-    implementation(libs.dagger.hilt.android.core)
-    kapt(libs.dagger.hilt.android.compiler)
-}
-
-kapt {
-    correctErrorTypes = true
 }

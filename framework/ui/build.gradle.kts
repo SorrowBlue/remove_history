@@ -2,8 +2,7 @@
 
 plugins {
     id("build-logic.android.library")
-    alias(libs.plugins.kotlin.kapt)
-    alias(libs.plugins.dagger.hilt.android)
+    id("com.sorrowblue.dagger-hilt")
 }
 
 android {
@@ -34,11 +33,4 @@ dependencies {
     api(libs.chrisbanes.insetter)
     api(libs.sorrowblue.binding.ktx)
     api(libs.androidx.paging.runtime.ktx)
-
-    implementation(libs.dagger.hilt.android.core)
-    kapt(libs.dagger.hilt.android.compiler)
-}
-
-kapt {
-    correctErrorTypes = true
 }

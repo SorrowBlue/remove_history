@@ -1,8 +1,7 @@
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     id("build-logic.android.library")
-    alias(libs.plugins.kotlin.kapt)
-    alias(libs.plugins.dagger.hilt.android)
+    id("com.sorrowblue.dagger-hilt")
     alias(libs.plugins.google.ksp)
 }
 
@@ -18,9 +17,6 @@ dependencies {
     implementation(libs.androidx.paging.common)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
 
-    implementation(libs.dagger.hilt.android.core)
-    kapt(libs.dagger.hilt.android.compiler)
-
     androidTestImplementation(libs.androidx.room.testing)
     androidTestImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.bundles.androidx.instrumented.tests)
@@ -28,8 +24,4 @@ dependencies {
 
 ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
-}
-
-kapt {
-    correctErrorTypes = true
 }

@@ -1,8 +1,7 @@
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     id("build-logic.android.library")
-    alias(libs.plugins.kotlin.kapt)
-    alias(libs.plugins.dagger.hilt.android)
+    id("com.sorrowblue.dagger-hilt")
 }
 
 dependencies {
@@ -16,11 +15,4 @@ dependencies {
 
     implementation(libs.androidx.hilt.work)
     kapt(libs.androidx.hilt.compiler)
-
-    implementation(libs.dagger.hilt.android.core)
-    kapt(libs.dagger.hilt.android.compiler)
-}
-
-kapt {
-    correctErrorTypes = true
 }

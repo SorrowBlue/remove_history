@@ -5,9 +5,8 @@ import org.jetbrains.kotlin.konan.properties.propertyString
 
 plugins {
     id("build-logic.android.application")
-    alias(libs.plugins.kotlin.kapt)
+    id("com.sorrowblue.dagger-hilt")
     alias(libs.plugins.androidx.navigation.safeargs.kotlin)
-    alias(libs.plugins.dagger.hilt.android)
     alias(libs.plugins.aboutlibraries.plugin)
     alias(libs.plugins.grgit)
 }
@@ -128,13 +127,6 @@ dependencies {
 
     debugImplementation(libs.squareup.leakcanary.android)
 
-    implementation(libs.dagger.hilt.android.core)
-    kapt(libs.dagger.hilt.android.compiler)
-
     androidTestImplementation(libs.androidx.test.ext.junit.ktx)
     androidTestImplementation(libs.androidx.test.espresso.core)
-}
-
-kapt {
-    correctErrorTypes = true
 }

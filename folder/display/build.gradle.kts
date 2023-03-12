@@ -2,9 +2,8 @@
 
 plugins {
     id("build-logic.android.library")
-    alias(libs.plugins.kotlin.kapt)
+    id("com.sorrowblue.dagger-hilt")
     alias(libs.plugins.androidx.navigation.safeargs.kotlin)
-    alias(libs.plugins.dagger.hilt.android)
 }
 
 android {
@@ -19,11 +18,4 @@ android {
 dependencies {
     implementation(projects.framework.ui)
     implementation(projects.domain)
-
-    implementation(libs.dagger.hilt.android.core)
-    kapt(libs.dagger.hilt.android.compiler)
-}
-
-kapt {
-    correctErrorTypes = true
 }
