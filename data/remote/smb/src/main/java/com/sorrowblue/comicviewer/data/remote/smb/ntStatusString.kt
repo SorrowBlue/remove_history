@@ -1,4 +1,4 @@
-package com.sorrowblue.comicviewer.data.remote.client.smb
+package com.sorrowblue.comicviewer.data.remote.smb
 
 import jcifs.smb.NtStatus
 

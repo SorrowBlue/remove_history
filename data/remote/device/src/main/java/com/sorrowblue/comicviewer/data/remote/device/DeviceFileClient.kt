@@ -1,4 +1,4 @@
-package com.sorrowblue.comicviewer.data.remote.client.device
+package com.sorrowblue.comicviewer.data.remote.device
 
 import android.content.Context
 import android.content.Intent

@@ -1,4 +1,4 @@
-package com.sorrowblue.comicviewer.data.remote.client.device
+package com.sorrowblue.comicviewer.data.remote.device
 
 import com.sorrowblue.comicviewer.data.common.bookshelf.BookshelfModel
 import com.sorrowblue.comicviewer.data.remote.client.FileClient

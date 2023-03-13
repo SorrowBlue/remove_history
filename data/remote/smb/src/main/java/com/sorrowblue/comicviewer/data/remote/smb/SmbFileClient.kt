@@ -1,4 +1,4 @@
-package com.sorrowblue.comicviewer.data.remote.client.smb
+package com.sorrowblue.comicviewer.data.remote.smb
 
 import com.sorrowblue.comicviewer.data.common.FileModel
 import com.sorrowblue.comicviewer.data.common.SUPPORTED_IMAGE
