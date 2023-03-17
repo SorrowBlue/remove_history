@@ -1,5 +1,6 @@
 package com.sorrowblue.comicviewer.library.onedrive.list
 
+import com.sorrowblue.comicviewer.framework.resource.R as FrameworkResourceR
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
@@ -70,7 +71,7 @@ internal class OneDriveListFragment :
                     binding.profilePhoto.load(viewModel.profileImage())
                 } else {
                     binding.displayName.text = "no signed"
-                    binding.profilePhoto.setImageResource(com.sorrowblue.comicviewer.framework.resource.R.drawable.ic_twotone_broken_image_24)
+                    binding.profilePhoto.setImageResource(FrameworkResourceR.drawable.ic_twotone_broken_image_24)
                 }
             }
         }

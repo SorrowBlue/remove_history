@@ -16,7 +16,7 @@ internal class FolderDisplaySettingsSerializer(private val coroutineDispatcher: 
     override val defaultValue = FolderDisplaySettings()
 
     override suspend fun readFrom(input: InputStream): FolderDisplaySettings {
-        return ProtoBuf.decodeFromByteArray(FolderDisplaySettings.serializer(), input.readBytes())
+        return kotlin.runCatching { ProtoBuf.decodeFromByteArray(FolderDisplaySettings.serializer(), input.readBytes()) }.getOrElse { FolderDisplaySettings() }
     }
 
     override suspend fun writeTo(t: FolderDisplaySettings, output: OutputStream) {

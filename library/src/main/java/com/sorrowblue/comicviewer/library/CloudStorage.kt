@@ -1,5 +1,7 @@
 package com.sorrowblue.comicviewer.library
 
+import com.sorrowblue.comicviewer.framework.resource.R as FrameworkResourceR
+
 sealed interface CloudStorage : Library {
     val isInstalled: Boolean
     val iconRes: Int
@@ -8,25 +10,25 @@ sealed interface CloudStorage : Library {
 
     data class GoogleDrive(override val isInstalled: Boolean) : CloudStorage {
         override val iconRes =
-            com.sorrowblue.comicviewer.framework.resource.R.drawable.ic_google_drive_icon_2020
+            FrameworkResourceR.drawable.ic_google_drive_icon_2020
         override val titleRes = R.string.library_list_label_google_drive
     }
 
     data class OneDrive(override val isInstalled: Boolean) : CloudStorage {
         override val iconRes =
-            com.sorrowblue.comicviewer.framework.resource.R.drawable.ic_microsoft_office_onedrive
+            FrameworkResourceR.drawable.ic_microsoft_office_onedrive
         override val titleRes = R.string.library_list_label_one_drive
     }
 
     data class Dropbox(override val isInstalled: Boolean) : CloudStorage {
         override val iconRes =
-            com.sorrowblue.comicviewer.framework.resource.R.drawable.ic_dropbox_tab_32
+            FrameworkResourceR.drawable.ic_dropbox_tab_32
         override val titleRes = R.string.library_list_label_dropbox
     }
 
     data class Box(override val isInstalled: Boolean) : CloudStorage {
         override val iconRes =
-            com.sorrowblue.comicviewer.framework.resource.R.drawable.ic_box_blue_cmyk
+            FrameworkResourceR.drawable.ic_box_blue_cmyk
         override val titleRes = R.string.library_list_label_box
     }
 }

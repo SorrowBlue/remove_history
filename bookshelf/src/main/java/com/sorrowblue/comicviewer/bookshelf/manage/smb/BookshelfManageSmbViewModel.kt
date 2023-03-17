@@ -54,7 +54,7 @@ internal class BookshelfManageSmbViewModel @Inject constructor(
     val pathFlow =
         folder.mapNotNull { it?.path?.removePrefix("/")?.removeSuffix("/") }.mutableStateIn("")
     val displayNameFlow = smbServerFlow.mapNotNull { it?.displayName }.mutableStateIn("")
-    val isGuestFlow = MutableStateFlow(false)
+    val isGuestFlow = smbServerFlow.mapNotNull { it?.auth !is SmbServer.Auth.UsernamePassword }.mutableStateIn(true)
     val domainFlow = smbServerFlow.mapNotNull { it?.domain }.mutableStateIn("")
     val usernameFlow = smbServerFlow.mapNotNull { it?.username }.mutableStateIn("")
     val passwordFlow = smbServerFlow.mapNotNull { it?.password }.mutableStateIn("")

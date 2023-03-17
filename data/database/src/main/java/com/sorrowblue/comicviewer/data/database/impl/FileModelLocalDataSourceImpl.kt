@@ -179,4 +179,10 @@ internal class FileModelLocalDataSourceImpl @Inject constructor(
     override suspend fun removeCacheKey(diskCacheKey: String) {
         return dao.removeCacheKey(diskCacheKey)
     }
+
+    override fun pagingHistoryBookSource(pagingConfig: PagingConfig): Flow<PagingData<FileModel>> {
+        return Pager(pagingConfig) {
+            dao.pagingHistoryBookSource()
+        }.flow.map { pagingData -> pagingData.map { it.toModel() } }
+    }
 }

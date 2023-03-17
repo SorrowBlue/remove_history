@@ -14,7 +14,12 @@ import kotlinx.coroutines.flow.Flow
 
 interface FileRepository {
 
-    suspend fun update(bookshelfId: BookshelfId, path: String, lastReadPage: Int, lastReadTime: Long)
+    suspend fun update(
+        bookshelfId: BookshelfId,
+        path: String,
+        lastReadPage: Int,
+        lastReadTime: Long
+    )
 
     fun pagingDataFlow(
         pagingConfig: PagingConfig,
@@ -43,4 +48,6 @@ interface FileRepository {
 
     suspend fun list(bookshelfId: BookshelfId): List<File>
     suspend fun getFolder(bookshelf: Bookshelf, path: String): Result<Folder, FileRepositoryError>
+
+    fun pagingHistoryBookFlow(pagingConfig: PagingConfig): Flow<PagingData<File>>
 }

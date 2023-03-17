@@ -1,5 +1,6 @@
 package com.sorrowblue.comicviewer.book
 
+import com.sorrowblue.comicviewer.framework.resource.R as FrameworkResourceR
 import android.graphics.Bitmap
 import android.view.ViewGroup
 import androidx.core.view.isVisible
@@ -92,7 +93,7 @@ internal class BookAdapter(
                 }
             } else {
                 binding.bookName.text = "本はありません"
-                binding.bookThumbnail.load(com.sorrowblue.comicviewer.framework.resource.R.drawable.ic_undraw_not_found_re_44w9)
+                binding.bookThumbnail.load(FrameworkResourceR.drawable.ic_undraw_not_found_re_44w9)
                 binding.bookNext.isVisible = false
                 binding.bookNext.setOnClickListener(null)
             }

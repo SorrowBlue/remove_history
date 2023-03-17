@@ -44,7 +44,8 @@ internal class FileRepositoryImpl @Inject constructor(
 
     override suspend fun getBook(bookshelfId: BookshelfId, path: String): Response<Book?> {
         return Response.Success(
-            fileModelLocalDataSource.findBy(BookshelfModelId(bookshelfId.value), path)?.toFile() as? Book
+            fileModelLocalDataSource.findBy(BookshelfModelId(bookshelfId.value), path)
+                ?.toFile() as? Book
         )
     }
 
@@ -121,7 +122,8 @@ internal class FileRepositoryImpl @Inject constructor(
     }
 
     override suspend fun list(bookshelfId: BookshelfId): List<File> {
-        return fileModelLocalDataSource.findBy(BookshelfModelId(bookshelfId.value)).map { it.toFile() }
+        return fileModelLocalDataSource.findBy(BookshelfModelId(bookshelfId.value))
+            .map { it.toFile() }
     }
 
     override suspend fun scan(folder: Folder, scanType: ScanType): String {
@@ -190,5 +192,10 @@ internal class FileRepositoryImpl @Inject constructor(
         }, {
             flowOf(Result.Exception(Unknown(it)))
         })
+    }
+
+    override fun pagingHistoryBookFlow(pagingConfig: PagingConfig): Flow<PagingData<File>> {
+        return fileModelLocalDataSource.pagingHistoryBookSource(pagingConfig)
+            .map { pagingData -> pagingData.map(FileModel::toFile) }
     }
 }

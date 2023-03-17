@@ -1,5 +1,6 @@
 package com.sorrowblue.comicviewer.library.onedrive.list
 
+import com.sorrowblue.comicviewer.framework.resource.R as FrameworkResourceR
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
@@ -12,7 +13,6 @@ import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.sorrowblue.comicviewer.framework.notification.ChannelID
-import com.sorrowblue.comicviewer.framework.resource.R
 import com.sorrowblue.comicviewer.library.onedrive.data.OneDriveApiRepository
 import kotlin.math.ceil
 import kotlinx.coroutines.Dispatchers
@@ -34,7 +34,7 @@ internal class OneDriveDownloadWorker(
     private val notificationManager = NotificationManagerCompat.from(applicationContext)
 
     private val notificationBuilder = NotificationCompat.Builder(appContext, ChannelID.DOWNLOAD.id)
-        .setSmallIcon(R.drawable.ic_twotone_downloading_24)
+        .setSmallIcon(FrameworkResourceR.drawable.ic_twotone_downloading_24)
 
     override suspend fun getForegroundInfo(): ForegroundInfo {
         return ForegroundInfo(

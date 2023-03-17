@@ -1,5 +1,6 @@
 package com.sorrowblue.comicviewer.library.box.list
 
+import com.sorrowblue.comicviewer.framework.resource.R as FrameworkResourceR
 import android.os.Bundle
 import android.view.View
 import androidx.core.app.NotificationChannelCompat
@@ -43,7 +44,7 @@ internal class BoxListFragment : LibraryFileListFragment() {
         viewModel.userInfoFlow.onEach {
             profileImage.load("https://api.box.com/2.0/users/${it?.id}/avatar") {
                 addHeader("Authorization", "Bearer ${viewModel.accessToken()}")
-                error(com.sorrowblue.comicviewer.framework.resource.R.drawable.ic_twotone_broken_image_24)
+                error(FrameworkResourceR.drawable.ic_twotone_broken_image_24)
             }
         }.launchInWithLifecycle()
     }

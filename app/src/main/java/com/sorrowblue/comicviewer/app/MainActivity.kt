@@ -77,8 +77,10 @@ internal class MainActivity : AppCompatActivity(R.layout.activity_main) {
         }
         binding.bottomNavigation.setupWithNavController(navController)
         commonViewModel.isVisibleBottomNav.onEach {
-            logcat { "bottomNavigation=$it" }
             binding.bottomNavigation.isShown(it)
+        }.launchInWithLifecycle()
+        navController.currentBackStack.onEach {
+            logcat("NAVIGATION", LogPriority.INFO) { it.joinToString(",") { it.destination.displayName.removePrefix("$packageName:") } }
         }.launchInWithLifecycle()
         navController.addOnDestinationChangedListener { _, destination, _ ->
             if (destination is FrameworkFragmentNavigator.Destination) {

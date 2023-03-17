@@ -25,6 +25,7 @@ import com.sorrowblue.comicviewer.domain.interactor.paging.PagingBookshelfFolder
 import com.sorrowblue.comicviewer.domain.interactor.paging.PagingFavoriteFileInteractor
 import com.sorrowblue.comicviewer.domain.interactor.paging.PagingFavoriteInteractor
 import com.sorrowblue.comicviewer.domain.interactor.paging.PagingFileInteractor
+import com.sorrowblue.comicviewer.domain.interactor.paging.PagingHistoryBookInteractor
 import com.sorrowblue.comicviewer.domain.interactor.paging.PagingQueryFileInteractor
 import com.sorrowblue.comicviewer.domain.interactor.paging.PagingReadLaterFileInteractor
 import com.sorrowblue.comicviewer.domain.interactor.settings.LoadSettingsInteractor
@@ -56,6 +57,7 @@ import com.sorrowblue.comicviewer.domain.usecase.paging.PagingBookshelfFolderUse
 import com.sorrowblue.comicviewer.domain.usecase.paging.PagingFavoriteFileUseCase
 import com.sorrowblue.comicviewer.domain.usecase.paging.PagingFavoriteUseCase
 import com.sorrowblue.comicviewer.domain.usecase.paging.PagingFileUseCase
+import com.sorrowblue.comicviewer.domain.usecase.paging.PagingHistoryBookUseCase
 import com.sorrowblue.comicviewer.domain.usecase.paging.PagingQueryFileUseCase
 import com.sorrowblue.comicviewer.domain.usecase.paging.PagingReadLaterFileUseCase
 import com.sorrowblue.comicviewer.domain.usecase.settings.LoadSettingsUseCase
@@ -155,6 +157,9 @@ internal abstract class ViewModelBindsModule {
 
     @Binds
     abstract fun bindPagingReadLaterFileUseCase(interactor: PagingReadLaterFileInteractor): PagingReadLaterFileUseCase
+
+    @Binds
+    abstract fun bindPagingHistoryBookUseCase(interactor: PagingHistoryBookInteractor): PagingHistoryBookUseCase
 
     // Settings
     @Binds

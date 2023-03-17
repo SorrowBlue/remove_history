@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    resourcePrefix("library")
+    resourcePrefix("history")
 
     buildFeatures {
         dataBinding = true
@@ -18,5 +18,7 @@ android {
 dependencies {
     implementation(projects.framework.ui)
     implementation(projects.domain)
-    implementation(projects.history)
+    implementation(projects.book)
+    implementation(projects.file)
+    implementation(projects.folder)
 }

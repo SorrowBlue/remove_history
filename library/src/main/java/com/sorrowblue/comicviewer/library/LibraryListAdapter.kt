@@ -1,5 +1,6 @@
 package com.sorrowblue.comicviewer.library
 
+import com.sorrowblue.comicviewer.framework.resource.R as FrameworkResourceR
 import android.view.ViewGroup
 import androidx.navigation.fragment.FragmentNavigator
 import androidx.navigation.fragment.FragmentNavigatorExtras
@@ -48,7 +49,12 @@ internal class LibraryListAdapter(private val onClick: (Library, FragmentNavigat
             when (item) {
                 LocalFeature.DOWNLOADED -> {
                     binding.headline.text = "ダウンロード済みの本"
-                    binding.leadingIcon.setImageResource(com.sorrowblue.comicviewer.framework.resource.R.drawable.ic_twotone_download_24)
+                    binding.leadingIcon.setImageResource(FrameworkResourceR.drawable.ic_twotone_download_24)
+                }
+
+                LocalFeature.HISTORY -> {
+                    binding.headline.text = "履歴"
+                    binding.leadingIcon.setImageResource(FrameworkResourceR.drawable.ic_twotone_history_24)
                 }
             }
         }
@@ -64,7 +70,7 @@ internal class LibraryListAdapter(private val onClick: (Library, FragmentNavigat
             binding.root.setOnClickListener { onClick.invoke(item, FragmentNavigatorExtras(it to it.transitionName)) }
             binding.headline.setText(item.titleRes)
             binding.leadingIcon.setImageResource(item.iconRes)
-            binding.trailingIcon.setImageResource(if (item.isInstalled) com.sorrowblue.comicviewer.framework.resource.R.drawable.ic_twotone_arrow_right_24 else com.sorrowblue.comicviewer.framework.resource.R.drawable.ic_twotone_download_24)
+            binding.trailingIcon.setImageResource(if (item.isInstalled) FrameworkResourceR.drawable.ic_twotone_arrow_right_24 else FrameworkResourceR.drawable.ic_twotone_download_24)
         }
     }
 }

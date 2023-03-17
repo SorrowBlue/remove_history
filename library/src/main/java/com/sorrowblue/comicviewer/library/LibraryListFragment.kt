@@ -30,6 +30,9 @@ internal class LibraryListFragment : FrameworkFragment(R.layout.library_fragment
         }
         val adapter = LibraryListAdapter { library, extras ->
             when (library) {
+                LocalFeature.HISTORY -> {
+                    navigate(LibraryListFragmentDirections.actionLibraryListToHistoryNavigation())
+                }
                 LocalFeature.DOWNLOADED -> {}
                 is CloudStorage.GoogleDrive -> navigate(
                     LibraryListFragmentDirections.actionLibraryListToGoogledriveNavigation(

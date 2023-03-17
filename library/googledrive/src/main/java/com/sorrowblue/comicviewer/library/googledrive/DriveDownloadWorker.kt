@@ -19,13 +19,12 @@ import com.google.api.services.drive.Drive
 import com.google.api.services.drive.DriveScopes
 import com.sorrowblue.comicviewer.framework.notification.ChannelID
 import com.sorrowblue.comicviewer.framework.notification.createNotification
-import com.sorrowblue.comicviewer.framework.resource.R
 import kotlin.math.ceil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import logcat.logcat
-
+import com.sorrowblue.comicviewer.framework.resource.R as FrameworkResourceR
 
 internal class DriveDownloadWorker(appContext: Context, params: WorkerParameters) :
     CoroutineWorker(appContext, params) {
@@ -40,7 +39,7 @@ internal class DriveDownloadWorker(appContext: Context, params: WorkerParameters
         return ForegroundInfo(NOTIFICATION_ID, createNotification(
             applicationContext,
             ChannelID.DOWNLOAD,
-            R.drawable.ic_twotone_downloading_24
+            FrameworkResourceR.drawable.ic_twotone_downloading_24
         ) {
             setContentTitle("バックグラウンドで実行")
         })
@@ -103,11 +102,11 @@ internal class DriveDownloadWorker(appContext: Context, params: WorkerParameters
                 Manifest.permission.POST_NOTIFICATIONS
             ) == PackageManager.PERMISSION_GRANTED
         ) {
-            notificationManager.notify(tag,NOTIFICATION_ID,
+            notificationManager.notify(tag, NOTIFICATION_ID,
                 createNotification(
                     applicationContext,
                     ChannelID.DOWNLOAD,
-                    R.drawable.ic_twotone_downloading_24
+                    FrameworkResourceR.drawable.ic_twotone_downloading_24
                 ) {
                     setContentTitle(name)
                     setProgress(0, 0, true)
@@ -126,7 +125,7 @@ internal class DriveDownloadWorker(appContext: Context, params: WorkerParameters
                 createNotification(
                     applicationContext,
                     ChannelID.DOWNLOAD,
-                    R.drawable.ic_twotone_downloading_24
+                    FrameworkResourceR.drawable.ic_twotone_downloading_24
                 ) {
                     setContentTitle(name)
                     setProgress(100, progress, false)
@@ -145,7 +144,7 @@ internal class DriveDownloadWorker(appContext: Context, params: WorkerParameters
                 createNotification(
                     applicationContext,
                     ChannelID.DOWNLOAD,
-                    R.drawable.ic_twotone_downloading_24
+                    FrameworkResourceR.drawable.ic_twotone_downloading_24
                 ) {
                     setContentTitle("1個のファイルをダウンロードしました。")
                     setContentText(name)

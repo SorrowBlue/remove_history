@@ -21,6 +21,9 @@
         <action
             android:id="@+id/action_library_list_to_onedrive_navigation"
             app:destination="@id/onedrive" />
+        <action
+            android:id="@+id/action_library_list_to_history_navigation"
+            app:destination="@id/history_navigation" />
     </fragment>
     <include-dynamic
         android:id="@+id/googledrive"
@@ -58,4 +61,5 @@
             android:autoVerify="true"
             app:uri="comicviewer.sorrowblue.com/box/oauth2?state={state}&amp;code={code}" />
     </fragment>
+    <include app:graph="@navigation/history" />
 </navigation>

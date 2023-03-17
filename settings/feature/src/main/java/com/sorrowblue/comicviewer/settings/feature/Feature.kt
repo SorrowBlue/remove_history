@@ -1,5 +1,6 @@
 package com.sorrowblue.comicviewer.settings.feature
 
+import com.sorrowblue.comicviewer.framework.resource.R as FrameworkResourceR
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import com.google.android.play.core.ktx.bytesDownloaded
@@ -19,13 +20,13 @@ enum class Feature(
 
     ARCHIVE(
         "zip",
-        com.sorrowblue.comicviewer.framework.resource.R.drawable.ic_twotone_folder_zip_24,
+        FrameworkResourceR.drawable.ic_twotone_folder_zip_24,
         R.string.settings_feature_title_archive,
         R.string.settings_feature_desc_archive
     ),
     DOCUMENT(
         "document",
-        com.sorrowblue.comicviewer.framework.resource.R.drawable.ic_twotone_picture_as_pdf_24,
+        FrameworkResourceR.drawable.ic_twotone_picture_as_pdf_24,
         R.string.settings_feature_title_document,
         R.string.settings_feature_desc_document
     )
