@@ -13,7 +13,6 @@ import com.sorrowblue.comicviewer.domain.entity.file.Folder
 import com.sorrowblue.comicviewer.file.info.observeOpenFolder
 import com.sorrowblue.comicviewer.file.list.FileListFragment
 import com.sorrowblue.comicviewer.folder.FolderFragmentArgs
-import com.sorrowblue.comicviewer.folder.FolderFragmentDirections
 import com.sorrowblue.comicviewer.readlater.databinding.ReadlaterFragmentBinding
 import com.sorrowblue.jetpack.binding.viewBinding
 import dagger.hilt.android.AndroidEntryPoint
