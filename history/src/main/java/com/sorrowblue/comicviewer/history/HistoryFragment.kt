@@ -29,7 +29,6 @@ internal class HistoryFragment : PagingFragment<File>(R.layout.history_fragment)
     private val binding: HistoryFragmentBinding by viewBinding()
     override val viewModel: HistoryViewModel by viewModels()
 
-
     override val adapter
         get() = FileListAdapter(
             FolderDisplaySettings.Display.LIST,
