@@ -10,6 +10,7 @@ import androidx.core.splashscreen.SplashScreenViewProvider
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
+import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.snackbar.Snackbar
@@ -83,6 +84,7 @@ internal class MainActivity : AppCompatActivity(R.layout.activity_main) {
             logcat("NAVIGATION", LogPriority.INFO) { it.joinToString(",") { it.destination.displayName.removePrefix("$packageName:") } }
         }.launchInWithLifecycle()
         navController.addOnDestinationChangedListener { _, destination, _ ->
+            logcat { destination.hierarchy.joinToString { it.displayName.removePrefix("$packageName:") } }
             if (destination is FrameworkFragmentNavigator.Destination) {
                 binding.bottomNavigation.isShown(destination.isVisibleBottomNavigation)
                 binding.frameworkUiFab.isShownWithImageResource(

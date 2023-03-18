@@ -64,30 +64,30 @@ abstract class PagingFragment<T : Any>(contentLayoutId: Int) : FrameworkFragment
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (viewModel.transitionName != null) {
-            sharedElementEnterTransition = MaterialContainerTransform().apply {
-                fadeMode = MaterialContainerTransform.FADE_MODE_THROUGH
-                scrimColor = MaterialColors.getColor(
-                    requireContext(),
-                    android.R.attr.colorBackground,
-                    Color.TRANSPARENT
-                )
-                setPathMotion(MaterialArcMotion())
-            }
-            exitTransition = MaterialElevationScale(false).apply {
-                excludeTarget(com.google.android.material.R.id.search_view_scrim, true)
-            }
-            reenterTransition = MaterialElevationScale(true).apply {
-                excludeTarget(com.google.android.material.R.id.search_view_scrim, true)
-            }
-        } else {
+//        if (viewModel.transitionName != null) {
+//            sharedElementEnterTransition = MaterialContainerTransform().apply {
+//                fadeMode = MaterialContainerTransform.FADE_MODE_THROUGH
+//                scrimColor = MaterialColors.getColor(
+//                    requireContext(),
+//                    android.R.attr.colorBackground,
+//                    Color.TRANSPARENT
+//                )
+//                setPathMotion(MaterialArcMotion())
+//            }
+//            exitTransition = MaterialElevationScale(false).apply {
+//                excludeTarget(com.google.android.material.R.id.search_view_scrim, true)
+//            }
+//            reenterTransition = MaterialElevationScale(true).apply {
+//                excludeTarget(com.google.android.material.R.id.search_view_scrim, true)
+//            }
+//        } else {
             enterTransition = MaterialFadeThrough().apply {
                 excludeTarget(com.google.android.material.R.id.search_view_scrim, true)
             }
             exitTransition = MaterialFadeThrough().apply {
                 excludeTarget(com.google.android.material.R.id.search_view_scrim, true)
             }
-        }
+//        }
     }
 
     override fun onCreateView(
@@ -110,15 +110,15 @@ abstract class PagingFragment<T : Any>(contentLayoutId: Int) : FrameworkFragment
         recyclerView.apply {
             adapter = pagingDataAdapter
             doOnPreDraw {
-                if (viewModel.isInitialize) {
-                    viewLifecycleOwner.lifecycleScope.launch {
-                        delay(500)
+//                if (viewModel.isInitialize) {
+//                    viewLifecycleOwner.lifecycleScope.launch {
+//                        delay(250)
                         startPostponedEnterTransition()
-                    }
-                } else {
-                    viewModel.isInitialize = true
-                    startPostponedEnterTransition()
-                }
+//                    }
+//                } else {
+//                    viewModel.isInitialize = true
+//                    startPostponedEnterTransition()
+//                }
             }
         }
         viewLifecycleOwner.lifecycleScope.launch {

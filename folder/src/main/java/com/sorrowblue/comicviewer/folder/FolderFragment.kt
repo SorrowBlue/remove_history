@@ -37,6 +37,7 @@ import com.sorrowblue.comicviewer.domain.entity.file.Folder
 import com.sorrowblue.comicviewer.domain.entity.settings.FolderDisplaySettings
 import com.sorrowblue.comicviewer.domain.model.ScanType
 import com.sorrowblue.comicviewer.file.info.FileInfoNavigation
+import com.sorrowblue.comicviewer.file.info.observeOpenFolder
 import com.sorrowblue.comicviewer.file.list.FileListAdapter
 import com.sorrowblue.comicviewer.file.list.FileListFragment
 import com.sorrowblue.comicviewer.folder.databinding.FolderFragmentBinding
@@ -53,7 +54,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import logcat.logcat
 
 @AndroidEntryPoint
 internal class FolderFragment : FileListFragment(R.layout.folder_fragment),
@@ -117,6 +117,12 @@ internal class FolderFragment : FileListFragment(R.layout.folder_fragment),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        observeOpenFolder(R.id.folder_fragment) { bookshelfId, parent ->
+            findNavController().navigate(
+                FolderFragmentDirections.actionFolderSelf(bookshelfId, parent)
+            )
+        }
+
         binding.viewModel = viewModel
 
         binding.toolbar.setOnLongClickListener {
@@ -165,7 +171,7 @@ internal class FolderFragment : FileListFragment(R.layout.folder_fragment),
         transitionName: String
     ) = object : NavDirections {
         override val actionId = actionFolderToBook().actionId
-        override val arguments = BookFragmentArgs(book,transitionName).toBundle()
+        override val arguments = BookFragmentArgs(book, transitionName).toBundle()
     }
 
     private fun setupSearchAdapter() {
@@ -199,7 +205,7 @@ internal class FolderFragment : FileListFragment(R.layout.folder_fragment),
         binding.searchView.addTransitionListener { _, _, newState ->
             if (newState == SearchView.TransitionState.HIDDEN) {
                 commonViewModel.isVisibleBottomNav.tryEmit(true)
-            } else if(newState == SearchView.TransitionState.SHOWN){
+            } else if (newState == SearchView.TransitionState.SHOWN) {
                 commonViewModel.isVisibleBottomNav.tryEmit(false)
             }
             callback.isEnabled =

@@ -5,12 +5,15 @@ import android.view.View
 import androidx.fragment.app.viewModels
 import androidx.navigation.NavDirections
 import androidx.navigation.fragment.FragmentNavigator
+import androidx.navigation.fragment.findNavController
 import com.sorrowblue.comicviewer.book.BookFragmentArgs
 import com.sorrowblue.comicviewer.domain.entity.file.Book
 import com.sorrowblue.comicviewer.domain.entity.file.File
 import com.sorrowblue.comicviewer.domain.entity.file.Folder
+import com.sorrowblue.comicviewer.file.info.observeOpenFolder
 import com.sorrowblue.comicviewer.file.list.FileListFragment
 import com.sorrowblue.comicviewer.folder.FolderFragmentArgs
+import com.sorrowblue.comicviewer.folder.FolderFragmentDirections
 import com.sorrowblue.comicviewer.readlater.databinding.ReadlaterFragmentBinding
 import com.sorrowblue.jetpack.binding.viewBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -24,6 +27,13 @@ internal class ReadLaterFragment : FileListFragment(R.layout.readlater_fragment)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.viewModel = viewModel
+
+        observeOpenFolder(R.id.readlater_fragment) { bookshelfId, parent ->
+            findNavController().navigate(
+                ReadLaterFragmentDirections.actionReadlaterToFolder().actionId,
+                FolderFragmentArgs(bookshelfId, parent).toBundle()
+            )
+        }
     }
 
     override fun navigateToFile(

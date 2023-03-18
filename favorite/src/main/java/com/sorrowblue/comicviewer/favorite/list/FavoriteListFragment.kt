@@ -39,15 +39,6 @@ internal class FavoriteListFragment : PagingFragment<Favorite>(R.layout.favorite
         exitTransition = MaterialFadeThrough()
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        postponeEnterTransition()
-        return super.onCreateView(inflater, container, savedInstanceState)
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 

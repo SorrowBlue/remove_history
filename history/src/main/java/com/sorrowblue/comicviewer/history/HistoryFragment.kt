@@ -5,12 +5,14 @@ import android.view.View
 import androidx.fragment.app.viewModels
 import androidx.navigation.NavDirections
 import androidx.navigation.fragment.FragmentNavigator
+import androidx.navigation.fragment.findNavController
 import com.sorrowblue.comicviewer.book.BookFragmentArgs
 import com.sorrowblue.comicviewer.domain.entity.file.Book
 import com.sorrowblue.comicviewer.domain.entity.file.File
 import com.sorrowblue.comicviewer.domain.entity.file.Folder
 import com.sorrowblue.comicviewer.domain.entity.settings.FolderDisplaySettings
 import com.sorrowblue.comicviewer.file.info.FileInfoNavigation
+import com.sorrowblue.comicviewer.file.info.observeOpenFolder
 import com.sorrowblue.comicviewer.file.list.FileListAdapter
 import com.sorrowblue.comicviewer.framework.ui.fragment.PagingFragment
 import com.sorrowblue.comicviewer.framework.ui.fragment.type
@@ -38,6 +40,14 @@ internal class HistoryFragment : PagingFragment<File>(R.layout.history_fragment)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        observeOpenFolder(R.id.history_fragment) { bookshelfId, parent ->
+            findNavController().navigate(
+                HistoryFragmentDirections.actionHistoryToFolderNavigation().actionId,
+                BookFragmentArgs(bookshelfId, parent).toBundle()
+            )
+        }
+
         binding.viewModel = viewModel
 
         binding.toolbar.setupWithNavController()

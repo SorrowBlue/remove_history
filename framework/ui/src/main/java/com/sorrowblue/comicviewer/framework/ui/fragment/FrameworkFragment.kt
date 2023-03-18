@@ -65,9 +65,9 @@ open class FrameworkFragment(contentLayoutId: Int) : Fragment(contentLayoutId) {
 
     protected fun navigate(
         @IdRes resId: Int,
-        args: Bundle?,
-        navOptions: NavOptions?,
-        navigatorExtras: Navigator.Extras?
+        args: Bundle? = null,
+        navOptions: NavOptions? = null,
+        navigatorExtras: Navigator.Extras? = null
     ) {
         findNavController().navigate(resId, args, navOptions, navigatorExtras)
     }
