@@ -4,7 +4,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.sorrowblue.comicviewer.data.common.FileModel
 import com.sorrowblue.comicviewer.data.common.bookshelf.BookshelfModelId
-import com.sorrowblue.comicviewer.data.common.bookshelf.SortType
+import com.sorrowblue.comicviewer.data.common.bookshelf.SortEntity
 import com.sorrowblue.comicviewer.data.common.favorite.FavoriteFileModel
 import com.sorrowblue.comicviewer.data.common.favorite.FavoriteModel
 import com.sorrowblue.comicviewer.data.common.favorite.FavoriteModelId
@@ -28,7 +28,7 @@ interface FavoriteBookLocalDataSource {
     fun pagingSource(
         pagingConfig: PagingConfig,
         favoriteModelId: FavoriteModelId,
-        sortType: () -> SortType
+        sortType: () -> SortEntity
     ): Flow<PagingData<FileModel>>
 
     suspend fun getCacheKeyList(favoriteModelId: FavoriteModelId, limit: Int): List<String>

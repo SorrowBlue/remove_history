@@ -12,8 +12,6 @@ import com.sorrowblue.comicviewer.framework.settings.preference
 import com.sorrowblue.comicviewer.framework.settings.preferenceBinding
 import com.sorrowblue.comicviewer.framework.ui.flow.launchInWithLifecycle
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 
 internal class SettingsFolderBinding(fragment: FrameworkPreferenceFragment) :

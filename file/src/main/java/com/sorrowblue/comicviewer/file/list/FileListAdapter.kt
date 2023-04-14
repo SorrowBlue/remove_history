@@ -23,7 +23,6 @@ class FileListAdapter(
 
     fun setDisplay(display: FolderDisplaySettings.Display) {
         this.display = display
-        refresh()
     }
 
     override fun getItemViewType(position: Int) = display.ordinal

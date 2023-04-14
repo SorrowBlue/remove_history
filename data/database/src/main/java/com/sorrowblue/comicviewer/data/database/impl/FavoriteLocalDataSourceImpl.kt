@@ -6,7 +6,7 @@ import androidx.paging.PagingData
 import androidx.paging.map
 import com.sorrowblue.comicviewer.data.common.FileModel
 import com.sorrowblue.comicviewer.data.common.bookshelf.BookshelfModelId
-import com.sorrowblue.comicviewer.data.common.bookshelf.SortType
+import com.sorrowblue.comicviewer.data.common.bookshelf.SortEntity
 import com.sorrowblue.comicviewer.data.common.favorite.FavoriteFileModel
 import com.sorrowblue.comicviewer.data.common.favorite.FavoriteModel
 import com.sorrowblue.comicviewer.data.common.favorite.FavoriteModelId
@@ -21,7 +21,6 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
-import logcat.logcat
 
 internal class FavoriteBookLocalDataSourceImpl @Inject constructor(
     private val favoriteFileDao: FavoriteFileDao,
@@ -29,7 +28,7 @@ internal class FavoriteBookLocalDataSourceImpl @Inject constructor(
     override fun pagingSource(
         pagingConfig: PagingConfig,
         favoriteModelId: FavoriteModelId,
-        sortType: () -> SortType
+        sortType: () -> SortEntity
     ): Flow<PagingData<FileModel>> {
         return Pager(pagingConfig) {
             favoriteFileDao.pagingSource(favoriteModelId.value, sortType.invoke())
@@ -37,9 +36,7 @@ internal class FavoriteBookLocalDataSourceImpl @Inject constructor(
     }
 
     override suspend fun getCacheKeyList(favoriteModelId: FavoriteModelId, limit: Int): List<String> {
-        return favoriteFileDao.selectCacheKey(favoriteModelId.value, limit).also {
-            logcat { "cacheKeyList=${it}" }
-        }
+        return favoriteFileDao.selectCacheKey(favoriteModelId.value, limit)
     }
 }
 

@@ -7,7 +7,9 @@ import com.sorrowblue.comicviewer.data.common.SimpleFileModel
 import com.sorrowblue.comicviewer.data.common.bookshelf.BookshelfModel
 import com.sorrowblue.comicviewer.data.common.bookshelf.BookshelfModelId
 import com.sorrowblue.comicviewer.data.common.bookshelf.FolderThumbnailOrderModel
-import com.sorrowblue.comicviewer.data.common.bookshelf.SortType
+import com.sorrowblue.comicviewer.data.common.bookshelf.SearchConditionEntity
+import com.sorrowblue.comicviewer.data.common.bookshelf.SortEntity
+import com.sorrowblue.comicviewer.domain.usecase.paging.SortType
 import kotlinx.coroutines.flow.Flow
 
 interface FileModelLocalDataSource {
@@ -39,7 +41,7 @@ interface FileModelLocalDataSource {
         pagingConfig: PagingConfig,
         bookshelfModel: BookshelfModel,
         fileModel: FileModel,
-        sortType: () -> SortType
+        sortType: () -> SortEntity
     ): Flow<PagingData<FileModel>>
 
     suspend fun findBy(bookshelfModelId: BookshelfModelId): List<FileModel>
@@ -59,9 +61,8 @@ interface FileModelLocalDataSource {
     fun pagingSource(
         pagingConfig: PagingConfig,
         bookshelfModelId: BookshelfModelId,
-        parent: () -> String?,
-        query: () -> String,
-        sortType: () -> SortType
+        searchConditionEntity: SearchConditionEntity,
+        sortEntity: () -> SortEntity
     ): Flow<PagingData<FileModel>>
 
     suspend fun root(id: BookshelfModelId): FileModel.Folder?

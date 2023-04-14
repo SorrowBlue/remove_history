@@ -6,24 +6,26 @@ import androidx.paging.map
 import com.sorrowblue.comicviewer.data.common.FileModel
 import com.sorrowblue.comicviewer.data.common.bookshelf.BookshelfModelId
 import com.sorrowblue.comicviewer.data.common.bookshelf.ScanTypeModel
-import com.sorrowblue.comicviewer.data.common.bookshelf.SortType
+import com.sorrowblue.comicviewer.data.common.bookshelf.SearchConditionEntity
+import com.sorrowblue.comicviewer.data.common.bookshelf.SortEntity
 import com.sorrowblue.comicviewer.data.datasource.FileModelLocalDataSource
 import com.sorrowblue.comicviewer.data.datasource.RemoteDataSource
 import com.sorrowblue.comicviewer.data.toFile
 import com.sorrowblue.comicviewer.data.toFileModel
 import com.sorrowblue.comicviewer.data.toServerModel
+import com.sorrowblue.comicviewer.domain.entity.SearchCondition
 import com.sorrowblue.comicviewer.domain.entity.bookshelf.Bookshelf
 import com.sorrowblue.comicviewer.domain.entity.bookshelf.BookshelfId
 import com.sorrowblue.comicviewer.domain.entity.file.Book
 import com.sorrowblue.comicviewer.domain.entity.file.File
 import com.sorrowblue.comicviewer.domain.entity.file.Folder
-import com.sorrowblue.comicviewer.domain.entity.settings.FolderDisplaySettings
 import com.sorrowblue.comicviewer.domain.model.Response
 import com.sorrowblue.comicviewer.domain.model.ScanType
 import com.sorrowblue.comicviewer.domain.model.SupportExtension
 import com.sorrowblue.comicviewer.domain.repository.FileRepository
 import com.sorrowblue.comicviewer.domain.repository.FileRepositoryError
 import com.sorrowblue.comicviewer.domain.repository.SettingsCommonRepository
+import com.sorrowblue.comicviewer.domain.usecase.paging.SortType
 import com.sorrowblue.comicviewer.framework.Result
 import com.sorrowblue.comicviewer.framework.Unknown
 import javax.inject.Inject
@@ -86,33 +88,22 @@ internal class FileRepositoryImpl @Inject constructor(
             folder.toFileModel()
         ) {
             val settings = runBlocking { settingsCommonRepository.folderDisplaySettings.first() }
-            when (settings.sort) {
-                FolderDisplaySettings.Sort.NAME -> SortType.NAME(settings.order == FolderDisplaySettings.Order.ASC)
-                FolderDisplaySettings.Sort.DATE -> SortType.DATE(settings.order == FolderDisplaySettings.Order.ASC)
-                FolderDisplaySettings.Sort.SIZE -> SortType.SIZE(settings.order == FolderDisplaySettings.Order.ASC)
-            }
+            SortEntity.from(settings.sortType)
         }.map { it.map(FileModel::toFile) }
     }
 
     override fun pagingDataFlow(
         pagingConfig: PagingConfig,
         bookshelf: Bookshelf,
-        parent: () -> String?,
-        query: () -> String,
+        searchCondition: SearchCondition,
+        sortType: () -> SortType
     ): Flow<PagingData<File>> {
         return fileModelLocalDataSource.pagingSource(
             pagingConfig,
             BookshelfModelId(bookshelf.id.value),
-            parent,
-            query
-        ) {
-            val settings = runBlocking { settingsCommonRepository.folderDisplaySettings.first() }
-            when (settings.sort) {
-                FolderDisplaySettings.Sort.NAME -> SortType.NAME(settings.order == FolderDisplaySettings.Order.ASC)
-                FolderDisplaySettings.Sort.DATE -> SortType.DATE(settings.order == FolderDisplaySettings.Order.ASC)
-                FolderDisplaySettings.Sort.SIZE -> SortType.SIZE(settings.order == FolderDisplaySettings.Order.ASC)
-            }
-        }.map { pagingData -> pagingData.map(FileModel::toFile) }
+            SearchConditionEntity.from(searchCondition)
+        ) { SortEntity.from(sortType()) }
+            .map { pagingData -> pagingData.map(FileModel::toFile) }
     }
 
     override suspend fun get(bookshelfId: BookshelfId, path: String): Response<File?> {
@@ -198,4 +189,32 @@ internal class FileRepositoryImpl @Inject constructor(
         return fileModelLocalDataSource.pagingHistoryBookSource(pagingConfig)
             .map { pagingData -> pagingData.map(FileModel::toFile) }
     }
+}
+
+private fun SortEntity.Companion.from(sortType: SortType): SortEntity {
+    return when (sortType) {
+        is SortType.DATE -> SortEntity.DATE(sortType.isAsc)
+        is SortType.NAME -> SortEntity.NAME(sortType.isAsc)
+        is SortType.SIZE -> SortEntity.SIZE(sortType.isAsc)
+    }
+}
+
+private fun SearchConditionEntity.Companion.from(searchCondition: SearchCondition): SearchConditionEntity {
+    return SearchConditionEntity(
+        searchCondition.query,
+        when (val searchRange = searchCondition.range) {
+            SearchCondition.Range.BOOKSHELF -> SearchConditionEntity.Range.BOOKSHELF
+            is SearchCondition.Range.FOLDER_BELOW -> SearchConditionEntity.Range.FOLDER_BELOW(
+                searchRange.parent
+            )
+
+            is SearchCondition.Range.IN_FOLDER -> SearchConditionEntity.Range.IN_FOLDER(searchRange.parent)
+        },
+        when (searchCondition.period) {
+            SearchCondition.Period.NONE -> SearchConditionEntity.Period.NONE
+            SearchCondition.Period.HOUR_24 -> SearchConditionEntity.Period.HOUR_24
+            SearchCondition.Period.WEEK_1 -> SearchConditionEntity.Period.WEEK_1
+            SearchCondition.Period.MONTH_1 -> SearchConditionEntity.Period.MONTH_1
+        }
+    )
 }

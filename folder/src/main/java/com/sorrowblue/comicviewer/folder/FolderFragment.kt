@@ -2,6 +2,7 @@ package com.sorrowblue.comicviewer.folder
 
 import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
@@ -9,24 +10,27 @@ import android.view.MenuItem
 import android.view.View
 import androidx.activity.addCallback
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.Toolbar
-import androidx.core.content.PermissionChecker
 import androidx.core.net.toUri
-import androidx.core.widget.doAfterTextChanged
+import androidx.core.os.bundleOf
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
+import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.NavDeepLinkBuilder
 import androidx.navigation.NavDirections
 import androidx.navigation.fragment.FragmentNavigator
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.onNavDestinationSelected
 import androidx.paging.LoadState
 import androidx.paging.PagingDataAdapter
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.search.SearchView
 import com.google.android.material.snackbar.Snackbar
 import com.sorrowblue.comicviewer.book.BookFragmentArgs
@@ -42,7 +46,11 @@ import com.sorrowblue.comicviewer.file.list.FileListAdapter
 import com.sorrowblue.comicviewer.file.list.FileListFragment
 import com.sorrowblue.comicviewer.folder.databinding.FolderFragmentBinding
 import com.sorrowblue.comicviewer.framework.ui.flow.attachAdapter
+import com.sorrowblue.comicviewer.framework.ui.flow.launchInWithLifecycle
 import com.sorrowblue.comicviewer.framework.ui.fragment.CommonViewModel
+import com.sorrowblue.comicviewer.framework.ui.fragment.autoClearedValue
+import com.sorrowblue.comicviewer.framework.ui.fragment.checkSelfPermission
+import com.sorrowblue.comicviewer.framework.ui.fragment.makeSnackbar
 import com.sorrowblue.comicviewer.framework.ui.fragment.type
 import com.sorrowblue.jetpack.binding.viewBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -52,8 +60,10 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import logcat.logcat
 
 @AndroidEntryPoint
 internal class FolderFragment : FileListFragment(R.layout.folder_fragment),
@@ -62,6 +72,80 @@ internal class FolderFragment : FileListFragment(R.layout.folder_fragment),
     private val binding: FolderFragmentBinding by viewBinding()
     private val commonViewModel: CommonViewModel by activityViewModels()
     override val viewModel: FolderViewModel by viewModels()
+
+    private val bottomSheetBehavior by autoClearedValue { BottomSheetBehavior.from(binding.folderSearchView.contentRoot) }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        binding.viewModel = viewModel
+
+        binding.toolbar.setOnLongClickListener {
+            findNavController().popBackStack(R.id.folder_navigation, true)
+            true
+        }
+        binding.toolbar.setOnMenuItemClickListener(this)
+        setupSearchAdapter()
+        binding.folderSearchView.searchRecyclerView.applyInsetter {
+            type(systemBars = true, displayCutout = true, ime = true) {
+                padding(horizontal = true, bottom = true)
+            }
+        }
+
+        observeOpenFolder(R.id.folder_fragment) { id, parent ->
+            findNavController().navigate(FolderFragmentDirections.actionFolderSelf(id, parent))
+        }
+
+        setDialogFragmentResultListener<Boolean>(R.id.folder_fragment, "result") {
+            if (it) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                } else {
+                    // 直接通知の設定画面に遷移する
+                    Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                        putExtra(Settings.EXTRA_APP_PACKAGE, requireContext().packageName)
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }.let(::startActivity)
+                }
+            } else {
+                logcat { "通知は表示されません。" }
+            }
+        }
+    }
+
+    override fun onCreateAdapter(pagingDataAdapter: PagingDataAdapter<File, *>) {
+        super.onCreateAdapter(pagingDataAdapter)
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.sortTypeFlow.collectLatest {
+                pagingDataAdapter.refresh()
+            }
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            pagingDataAdapter.loadStateFlow.mapNotNull { it.refresh as? LoadState.Error }
+                .distinctUntilChanged()
+                .collectLatest {
+                    if (it.error is PagingException) {
+                        Snackbar.make(
+                            binding.root,
+                            (it.error as PagingException).getMessage(),
+                            Snackbar.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+        }
+        if (0 < viewModel.position) {
+            val position = viewModel.position
+            viewModel.position = -1
+            viewLifecycleOwner.lifecycleScope.launch {
+                repeatOnLifecycle(Lifecycle.State.CREATED) {
+                    pagingDataAdapter.loadStateFlow.distinctUntilChangedBy { it.refresh }
+                        .first { it.refresh is LoadState.NotLoading && pagingDataAdapter.itemCount > 0 }
+                    binding.recyclerView.scrollToPosition(position)
+                    commonViewModel.isRestored.emit(true)
+                }
+            }
+        }
+    }
 
     override fun navigateToFile(
         file: File,
@@ -85,64 +169,6 @@ internal class FolderFragment : FileListFragment(R.layout.folder_fragment),
         }
     }
 
-    override fun onCreateAdapter(pagingDataAdapter: PagingDataAdapter<File, *>) {
-        super.onCreateAdapter(pagingDataAdapter)
-        viewLifecycleOwner.lifecycleScope.launch {
-            pagingDataAdapter.loadStateFlow.mapNotNull { it.refresh as? LoadState.Error }
-                .distinctUntilChanged()
-                .collectLatest {
-                    if (it.error is PagingException) {
-                        Snackbar.make(
-                            binding.root,
-                            (it.error as PagingException).getMessage(),
-                            Snackbar.LENGTH_SHORT
-                        ).show()
-                    }
-                }
-        }
-        if (viewModel.position >= 0) {
-            val position = viewModel.position
-            viewModel.position = -1
-            viewLifecycleOwner.lifecycleScope.launch {
-                repeatOnLifecycle(Lifecycle.State.CREATED) {
-                    pagingDataAdapter.loadStateFlow.distinctUntilChangedBy { it.refresh }
-                        .first { it.refresh is LoadState.NotLoading && pagingDataAdapter.itemCount > 0 }
-                    binding.recyclerView.scrollToPosition(position)
-                    commonViewModel.isRestored.emit(true)
-                }
-            }
-        }
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        observeOpenFolder(R.id.folder_fragment) { bookshelfId, parent ->
-            findNavController().navigate(
-                FolderFragmentDirections.actionFolderSelf(bookshelfId, parent)
-            )
-        }
-
-        binding.viewModel = viewModel
-
-        binding.toolbar.setOnLongClickListener {
-            findNavController().popBackStack(R.id.folder_navigation, true)
-            true
-        }
-        binding.toolbar.setOnMenuItemClickListener(this)
-        setupSearchAdapter()
-        binding.searchRecyclerView.applyInsetter {
-            type(systemBars = true, displayCutout = true) {
-                padding(horizontal = true, bottom = true)
-            }
-        }
-        binding.searchFilter.applyInsetter {
-            type(systemBars = true, displayCutout = true) {
-                padding(horizontal = true)
-            }
-        }
-    }
-
     override fun onMenuItemClick(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.folder_search -> {
@@ -150,15 +176,8 @@ internal class FolderFragment : FileListFragment(R.layout.folder_fragment),
                 true
             }
 
-            R.id.folder_refresh -> {
-                scanType = ScanType.QUICK
-                requestScan()
-                true
-            }
-
-            R.id.folder_refresh_full -> {
-                scanType = ScanType.FULL
-                requestScan()
+            R.id.folder_menu_scan -> {
+                scan(ScanType.FULL)
                 true
             }
 
@@ -174,13 +193,58 @@ internal class FolderFragment : FileListFragment(R.layout.folder_fragment),
         override val arguments = BookFragmentArgs(book, transitionName).toBundle()
     }
 
+    private fun switchSearchResultSheet(state: Int? = null) {
+        if ((state ?: bottomSheetBehavior.state) == BottomSheetBehavior.STATE_EXPANDED) {
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+            WindowInsetsControllerCompat(requireActivity().window, requireView())
+                .hide(WindowInsetsCompat.Type.ime())
+            val avd = AnimatedVectorDrawableCompat.create(
+                requireContext(),
+                com.sorrowblue.comicviewer.framework.resource.R.drawable.ic_arrow_back_close
+            )!!
+            binding.searchView.toolbar.navigationIcon = avd
+            avd.start()
+            binding.searchView.toolbar.menu.findItem(R.id.folder_search_menu_filter).isVisible =
+                false
+            binding.folderSearchView.frontToolbar.menu.findItem(R.id.folder_search_menu_up).isVisible =
+                true
+            binding.folderSearchView.scrim.isVisible = true
+        } else if ((state ?: bottomSheetBehavior.state) == BottomSheetBehavior.STATE_COLLAPSED) {
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+            val avd = AnimatedVectorDrawableCompat.create(
+                requireContext(),
+                com.sorrowblue.comicviewer.framework.resource.R.drawable.ic_close_arrow_back
+            )!!
+            binding.searchView.toolbar.navigationIcon = avd
+            avd.start()
+            binding.searchView.toolbar.menu.findItem(R.id.folder_search_menu_filter).isVisible =
+                true
+            binding.folderSearchView.frontToolbar.menu.findItem(R.id.folder_search_menu_up).isVisible =
+                false
+            binding.folderSearchView.scrim.isVisible = false
+        }
+    }
+
     private fun setupSearchAdapter() {
+        binding.folderSearchView.setViewModel(viewModel)
         val searchAdapter = FileListAdapter(
             FolderDisplaySettings.Display.LIST,
             runBlocking { viewModel.isEnabledThumbnailFlow.first() },
             { file, transitionName, extras -> navigateToFile(file, transitionName, extras) },
             { navigate(FileInfoNavigation.getDeeplink(it)) }
         )
+
+        binding.folderSearchView.searchRecyclerView.adapter = searchAdapter
+        searchAdapter.loadStateFlow.distinctUntilChanged().onEach {
+            binding.folderSearchView.frontToolbar.title = "${searchAdapter.itemCount} results"
+        }.launchInWithLifecycle()
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.searchSortTypeFlow.collectLatest {
+//                searchAdapter.refresh()
+            }
+        }
+        viewModel.searchPagingDataFlow.attachAdapter(searchAdapter)
+
         val callback = requireActivity().onBackPressedDispatcher.addCallback(
             viewLifecycleOwner,
             binding.searchView.currentTransitionState == SearchView.TransitionState.SHOWING || binding.searchView.currentTransitionState == SearchView.TransitionState.SHOWN
@@ -189,19 +253,25 @@ internal class FolderFragment : FileListFragment(R.layout.folder_fragment),
                 binding.searchView.hide()
             }
         }
-        binding.searchFilter.setOnCheckedStateChangeListener { _, checkedIds ->
-            if (checkedIds.contains(R.id.search_filter_only_folder)) {
-                if (viewModel.parent != viewModel.folderFlow.value!!.path) {
-                    viewModel.parent = viewModel.folderFlow.value!!.path
-                    searchAdapter.refresh()
-                }
-            } else {
-                if (viewModel.parent != null) {
-                    viewModel.parent = null
-                    searchAdapter.refresh()
-                }
+        binding.folderSearchView.scrim.setOnClickListener { switchSearchResultSheet() }
+        binding.folderSearchView.frontToolbar.setOnMenuItemClickListener {
+            if (it.itemId == R.id.folder_search_menu_up) {
+                switchSearchResultSheet()
+            }
+            true
+        }
+
+        binding.searchView.toolbar.setNavigationOnClickListener {
+            if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_COLLAPSED) {
+                switchSearchResultSheet()
+            } else if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED) {
+                binding.searchView.hide()
             }
         }
+
+        callback.isEnabled =
+            binding.searchView.currentTransitionState == SearchView.TransitionState.SHOWING || binding.searchView.currentTransitionState == SearchView.TransitionState.SHOWN
+
         binding.searchView.addTransitionListener { _, _, newState ->
             if (newState == SearchView.TransitionState.HIDDEN) {
                 commonViewModel.isVisibleBottomNav.tryEmit(true)
@@ -211,97 +281,84 @@ internal class FolderFragment : FileListFragment(R.layout.folder_fragment),
             callback.isEnabled =
                 newState == SearchView.TransitionState.SHOWING || newState == SearchView.TransitionState.SHOWN
         }
-        viewModel.pagingQueryDataFlow.attachAdapter(searchAdapter)
-        binding.searchRecyclerView.adapter = searchAdapter
-        binding.searchView.editText.doAfterTextChanged { editable ->
-            editable?.toString()?.let {
-                if (viewModel.query != it) {
-                    viewModel.query = it
-                    searchAdapter.refresh()
-                }
+        binding.searchView.toolbar.inflateMenu(R.menu.folder_search)
+        binding.searchView.toolbar.menu.findItem(R.id.folder_search_menu_filter)
+            .setOnMenuItemClickListener {
+                switchSearchResultSheet()
+                true
+            }
+        switchSearchResultSheet(BottomSheetBehavior.STATE_COLLAPSED)
+    }
+
+    private val requestPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            if (isGranted) {
+            } else {
             }
         }
-    }
 
-    private val launcher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
-        if (it) {
-            scanStart()
-        } else {
-            show()
-        }
-    }
+    private var isExplainNotificationPermission = true
 
-    private lateinit var scanType: ScanType
-
-    private fun show() {
-        MaterialAlertDialogBuilder(requireContext()).setTitle("権限リクエスト")
-            .setMessage("スキャン状況を表示するため通知を許可してください").setPositiveButton("許可する") { _, _ ->
-                runCatching {
-                    startActivity(
-                        Intent(
-                            Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                            "package:${requireContext().packageName}".toUri()
-                        ).apply {
-                            flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                        })
-                }
-            }.setNegativeButton("キャンセル") { _, _ ->
-            }.setNeutralButton("許可しないで続行") { _, _ ->
-                scanStart()
-            }.show()
-    }
-
-    private fun requestScan() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            requestScanImpl33()
-        } else {
-            scanStart()
-        }
-    }
-
-    private fun scanStart() {
+    private fun scan(scanType: ScanType) {
         viewModel.fullScan(scanType) {
-            NavDeepLinkBuilder(requireContext()).setGraph(findNavController().graph).setDestination(
-                R.id.folder_scan_info_dialog,
-                FolderScanInfoDialogArgs(it).toBundle()
-            ).createPendingIntent()
-            findNavController().navigate(FolderFragmentDirections.actionFolderToFolderScanInfo(it))
-        }
-    }
+            makeSnackbar("スキャン中", Snackbar.LENGTH_INDEFINITE)
+                .setAction("詳細") {
+                    findNavController().navigate("comicviewer://comicviewer.sorrowblue.com/work?uuid=0".toUri())
+                }
+                .show()
+            when {
+                checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED -> {
+                    // 通知権限がある場合、なにもしない
+                }
 
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    private fun requestScanImpl33() {
-        when {
-            PermissionChecker.checkSelfPermission(
-                requireContext(), Manifest.permission.POST_NOTIFICATIONS
-            ) == PermissionChecker.PERMISSION_GRANTED -> {
-                // パーミッションが許可済み
-                scanStart()
-            }
+                shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS) -> {
+                    // ユーザに通知権限が必要な理由を説明する
+                    findNavController().navigate(
+                        FolderFragmentDirections.actionFolderToNotificationRequestDialogFragment().actionId,
+                        bundleOf("request_key" to this::class.qualifiedName)
+                    )
+                }
 
-            shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS) -> {
-                // パーミッションが許可されていない禁止されている。
-                // ユーザが許可しなかった場合。
-                Snackbar.make(binding.root, "通知を許可してください", Snackbar.LENGTH_SHORT)
-                    .setAction(android.R.string.ok) {
-                        launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                    }.show()
-            }
-
-            else -> {
-                // パーミッションが許可されていない禁止されている。
-                // ユーザが許可しなかった場合（今後表示しないしない）。
-                launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                isExplainNotificationPermission -> {
+                    findNavController().navigate(
+                        FolderFragmentDirections.actionFolderToNotificationRequestDialogFragment().actionId,
+                        bundleOf("request_key" to this::class.qualifiedName)
+                    )
+                    // 通知権限がない場合
+                }
             }
         }
     }
-}
 
-private fun PagingException.getMessage(): String {
-    return when (this) {
-        PagingException.NoNetwork -> "ネットワークに接続していません。"
-        PagingException.InvalidAuth -> "無効な認証情報"
-        PagingException.InvalidServer -> "サーバーが見つかりません"
-        PagingException.NotFound -> "ファイル/フォルダが見つかりません。"
+    private fun PagingException.getMessage(): String {
+        return when (this) {
+            PagingException.NoNetwork -> "ネットワークに接続していません。"
+            PagingException.InvalidAuth -> "無効な認証情報"
+            PagingException.InvalidServer -> "サーバーが見つかりません"
+            PagingException.NotFound -> "ファイル/フォルダが見つかりません。"
+        }
+    }
+
+    private fun <T> Fragment.setDialogFragmentResultListener(
+        destinationId: Int,
+        key: String,
+        result: (T) -> Unit
+    ) {
+        val navController = findNavController()
+        val navBackStackEntry = navController.getBackStackEntry(destinationId)
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME && navBackStackEntry.savedStateHandle.contains(
+                    key
+                )
+            ) {
+                result(navBackStackEntry.savedStateHandle.remove<T>(key)!!)
+            }
+        }
+        navBackStackEntry.lifecycle.addObserver(observer)
+        viewLifecycleOwner.lifecycle.addObserver(LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_DESTROY) {
+                navBackStackEntry.lifecycle.removeObserver(observer)
+            }
+        })
     }
 }

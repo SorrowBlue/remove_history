@@ -14,8 +14,8 @@ android {
         viewBinding = true
     }
 
-    packagingOptions {
-        resources.excludes.add("META-INF/DEPENDENCIES")
+    packaging {
+        resources.excludes += "META-INF/DEPENDENCIES"
     }
 }
 

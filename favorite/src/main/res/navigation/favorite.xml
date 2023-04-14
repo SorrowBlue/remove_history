@@ -8,6 +8,7 @@
         android:id="@+id/favorite_fragment"
         android:name="com.sorrowblue.comicviewer.favorite.FavoriteFragment"
         android:label="お気に入り"
+        app:bottomNavVisible="true"
         tools:layout="@layout/folder_fragment">
         <argument
             android:name="favorite_id"

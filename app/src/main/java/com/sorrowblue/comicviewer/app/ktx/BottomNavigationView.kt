@@ -8,6 +8,7 @@ import androidx.fragment.app.FragmentContainerView
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.sorrowblue.comicviewer.app.DisableableHideBottomViewOnScrollBehavior
+import logcat.logcat
 
 fun BottomNavigationView.isShown(isShown: Boolean?) {
     if (isShown == null) return

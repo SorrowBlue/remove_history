@@ -1,6 +1,7 @@
 package com.sorrowblue.comicviewer.app
 
 import androidx.lifecycle.ViewModel
+import androidx.work.WorkManager
 import com.sorrowblue.comicviewer.domain.model.EmptyRequest
 import com.sorrowblue.comicviewer.domain.usecase.GetNavigationHistoryUseCase
 import com.sorrowblue.comicviewer.domain.usecase.NavigationHistory
@@ -22,4 +23,5 @@ internal class MainViewModel @Inject constructor(
     val securitySettingsFlow = manageSecuritySettingsUseCase.settings
 
     fun getNavigationHistory(): Flow<NavigationHistory?> = getNavigationHistoryUseCase.execute(EmptyRequest).map { it.dataOrNull }
-}
+
+ }

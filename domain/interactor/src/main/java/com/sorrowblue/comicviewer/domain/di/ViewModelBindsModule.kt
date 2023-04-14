@@ -31,6 +31,7 @@ import com.sorrowblue.comicviewer.domain.interactor.paging.PagingReadLaterFileIn
 import com.sorrowblue.comicviewer.domain.interactor.settings.LoadSettingsInteractor
 import com.sorrowblue.comicviewer.domain.interactor.settings.ManageFolderDisplaySettingsInteractor
 import com.sorrowblue.comicviewer.domain.interactor.settings.ManageFolderSettingsInteractor
+import com.sorrowblue.comicviewer.domain.interactor.settings.ManageOneTimeFlagInteractor
 import com.sorrowblue.comicviewer.domain.interactor.settings.ManageSecuritySettingsInteractor
 import com.sorrowblue.comicviewer.domain.usecase.AddReadLaterUseCase
 import com.sorrowblue.comicviewer.domain.usecase.GetNavigationHistoryUseCase
@@ -63,6 +64,7 @@ import com.sorrowblue.comicviewer.domain.usecase.paging.PagingReadLaterFileUseCa
 import com.sorrowblue.comicviewer.domain.usecase.settings.LoadSettingsUseCase
 import com.sorrowblue.comicviewer.domain.usecase.settings.ManageFolderDisplaySettingsUseCase
 import com.sorrowblue.comicviewer.domain.usecase.settings.ManageFolderSettingsUseCase
+import com.sorrowblue.comicviewer.domain.usecase.settings.ManageOneTimeFlagUseCase
 import com.sorrowblue.comicviewer.domain.usecase.settings.ManageSecuritySettingsUseCase
 import dagger.Binds
 import dagger.Module
@@ -72,6 +74,9 @@ import dagger.hilt.android.components.ViewModelComponent
 @Module
 @InstallIn(ViewModelComponent::class)
 internal abstract class ViewModelBindsModule {
+
+    @Binds
+    abstract fun bindManageOneTimeFlagUseCase(interactor: ManageOneTimeFlagInteractor): ManageOneTimeFlagUseCase
 
     @Binds
     abstract fun bindRegisterBookshelfUseCase(interactor: RegisterBookshelfInteractor): RegisterBookshelfUseCase

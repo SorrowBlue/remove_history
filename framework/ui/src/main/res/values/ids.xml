@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <item name="activity_root" type="id" />
     <item name="fragment_root" type="id" />
     <item name="app_bar_layout" type="id" />
     <item name="toolbar" type="id" />

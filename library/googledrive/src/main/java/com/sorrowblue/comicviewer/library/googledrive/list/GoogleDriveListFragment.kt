@@ -4,8 +4,6 @@ import android.os.Bundle
 import android.view.View
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.fragment.app.viewModels
-import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
 import androidx.work.Constraints
 import androidx.work.OneTimeWorkRequestBuilder
@@ -17,7 +15,6 @@ import com.sorrowblue.comicviewer.framework.notification.ChannelID
 import com.sorrowblue.comicviewer.framework.ui.flow.launchInWithLifecycle
 import com.sorrowblue.comicviewer.library.filelist.LibraryFileListFragment
 import com.sorrowblue.comicviewer.library.googledrive.DriveDownloadWorker
-import com.sorrowblue.comicviewer.library.googledrive.R
 import kotlinx.coroutines.flow.onEach
 import logcat.logcat
 

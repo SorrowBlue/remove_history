@@ -1,5 +1,6 @@
 package com.sorrowblue.comicviewer.domain.entity.settings
 
+import com.sorrowblue.comicviewer.domain.usecase.paging.SortType
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -8,6 +9,7 @@ data class FolderDisplaySettings(
     val isEnabledThumbnail: Boolean = true,
     val spanCount: Int = 3,
     val columnSize: Size = Size.MEDIUM,
+    val sortType: SortType = SortType.NAME(true),
     val sort: Sort = Sort.NAME,
     val order: Order = Order.ASC
 ) {

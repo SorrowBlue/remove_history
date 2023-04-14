@@ -10,8 +10,6 @@ import coil.ImageLoader
 import coil.imageLoader
 import coil.request.Disposable
 import coil.request.ImageRequest
-import coil.size.Dimension
-import coil.size.Size
 import com.google.android.material.button.MaterialButton
 import com.sorrowblue.comicviewer.domain.entity.file.File
 import com.sorrowblue.comicviewer.framework.ui.flow.launchInWithLifecycle

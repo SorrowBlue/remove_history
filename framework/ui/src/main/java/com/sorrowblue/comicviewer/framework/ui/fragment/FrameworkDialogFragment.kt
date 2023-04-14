@@ -12,7 +12,9 @@ abstract class FrameworkDialogFragment : DialogFragment() {
 
     abstract fun onCreateDialog(savedInstanceState: Bundle?, builder: MaterialAlertDialogBuilder)
 
-    abstract fun onShow(dialog: AlertDialog)
+    open fun onShow(dialog: AlertDialog) {
+
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

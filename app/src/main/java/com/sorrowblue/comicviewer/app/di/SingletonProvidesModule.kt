@@ -1,4 +1,4 @@
-package com.sorrowblue.comicviewer.app
+package com.sorrowblue.comicviewer.app.di
 
 import android.content.Context
 import androidx.navigation.ui.AppBarConfiguration

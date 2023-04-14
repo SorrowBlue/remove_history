@@ -5,7 +5,7 @@ import android.view.View
 import androidx.fragment.app.DialogFragment
 import androidx.navigation.navGraphViewModels
 import coil.load
-import com.sorrowblue.comicviewer.framework.ui.fragment.launchInWithDialogLifecycle
+import com.sorrowblue.comicviewer.framework.ui.flow.launchInWithDialogLifecycle
 import com.sorrowblue.comicviewer.library.googledrive.R
 import com.sorrowblue.comicviewer.library.googledrive.databinding.GoogledriveFragmentProfileBinding
 import com.sorrowblue.comicviewer.library.googledrive.list.GoogleDriveApiRepositoryImpl

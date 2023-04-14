@@ -6,6 +6,7 @@ import com.sorrowblue.comicviewer.domain.entity.settings.DisplaySettings
 import com.sorrowblue.comicviewer.domain.entity.settings.FolderDisplaySettings
 import com.sorrowblue.comicviewer.domain.entity.settings.FolderSettings
 import com.sorrowblue.comicviewer.domain.entity.settings.History
+import com.sorrowblue.comicviewer.domain.entity.settings.OneTimeFlag
 import com.sorrowblue.comicviewer.domain.entity.settings.SecuritySettings
 import com.sorrowblue.comicviewer.domain.entity.settings.Settings
 import com.sorrowblue.comicviewer.domain.entity.settings.ViewerOperationSettings
@@ -22,7 +23,14 @@ internal class DatastoreDataSourceImpl @Inject constructor(
     private val folderSettingsDataStore: DataStore<FolderSettings>,
     private val viewerOperationSettingsDataStore: DataStore<ViewerOperationSettings>,
     private val securitySettingsDataStore: DataStore<SecuritySettings>,
+    private val oneTimeFlagDataStore: DataStore<OneTimeFlag>,
 ) : DatastoreDataSource {
+
+    override val oneTimeFlag: Flow<OneTimeFlag> = oneTimeFlagDataStore.data
+
+    override suspend fun updateOneTimeFlag(transform: suspend (OneTimeFlag) -> OneTimeFlag) {
+        oneTimeFlagDataStore.updateData(transform)
+    }
 
     override val history: Flow<History> = historyDataStore.data
     override suspend fun updateHistory(transform: suspend (History) -> History) =

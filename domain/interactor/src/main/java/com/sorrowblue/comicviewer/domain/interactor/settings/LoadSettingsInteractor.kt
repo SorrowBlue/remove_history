@@ -1,8 +1,10 @@
 package com.sorrowblue.comicviewer.domain.interactor.settings
 
+import com.sorrowblue.comicviewer.domain.entity.settings.OneTimeFlag
 import com.sorrowblue.comicviewer.domain.entity.settings.Settings
 import com.sorrowblue.comicviewer.domain.repository.SettingsCommonRepository
 import com.sorrowblue.comicviewer.domain.usecase.settings.LoadSettingsUseCase
+import com.sorrowblue.comicviewer.domain.usecase.settings.ManageOneTimeFlagUseCase
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 
@@ -14,5 +16,16 @@ internal class LoadSettingsInteractor @Inject constructor(
 
     override suspend fun edit(action: (Settings) -> Settings) {
         settingsCommonRepository.updateSettings(action)
+    }
+}
+
+internal class ManageOneTimeFlagInteractor @Inject constructor(
+    private val settingsCommonRepository: SettingsCommonRepository,
+) : ManageOneTimeFlagUseCase() {
+
+    override val settings: Flow<OneTimeFlag> = settingsCommonRepository.oneTimeFlag
+
+    override suspend fun edit(action: (OneTimeFlag) -> OneTimeFlag) {
+        settingsCommonRepository.updateOneTimeFlag(action)
     }
 }

@@ -2,6 +2,7 @@ package com.sorrowblue.comicviewer.domain.repository
 
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import com.sorrowblue.comicviewer.domain.entity.SearchCondition
 import com.sorrowblue.comicviewer.domain.entity.bookshelf.Bookshelf
 import com.sorrowblue.comicviewer.domain.entity.bookshelf.BookshelfId
 import com.sorrowblue.comicviewer.domain.entity.file.Book
@@ -9,6 +10,7 @@ import com.sorrowblue.comicviewer.domain.entity.file.File
 import com.sorrowblue.comicviewer.domain.entity.file.Folder
 import com.sorrowblue.comicviewer.domain.model.Response
 import com.sorrowblue.comicviewer.domain.model.ScanType
+import com.sorrowblue.comicviewer.domain.usecase.paging.SortType
 import com.sorrowblue.comicviewer.framework.Result
 import kotlinx.coroutines.flow.Flow
 
@@ -34,8 +36,8 @@ interface FileRepository {
     fun pagingDataFlow(
         pagingConfig: PagingConfig,
         bookshelf: Bookshelf,
-        parent: () -> String?,
-        query: () -> String
+        searchCondition: SearchCondition,
+        sortType: () -> SortType
     ): Flow<PagingData<File>>
 
     suspend fun get2(bookshelfId: BookshelfId, path: String): Result<File?, Unit>

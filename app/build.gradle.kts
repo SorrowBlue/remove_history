@@ -12,16 +12,19 @@ plugins {
     id("build-logic.android.application")
     id("com.sorrowblue.dagger-hilt")
     alias(libs.plugins.androidx.navigation.safeargs.kotlin)
-    alias(libs.plugins.aboutlibraries.plugin)
+    alias(libs.plugins.mikepenz.aboutlibraries.plugin)
     alias(libs.plugins.grgit)
 }
 
 fun String.toVersion() = this + if (matches(".*-[0-9]+-g[0-9a-f]{7}".toRegex())) "-SNAPSHOT" else ""
-
+val gitVersion = providers.exec {
+    commandLine("git", "--version")
+}.standardOutput.asText.get()
 android {
     defaultConfig {
         applicationId = "com.sorrowblue.comicviewer"
         versionCode = 12
+        println("gitVersion=$gitVersion")
         versionName = grgit.describe {
             longDescr = false
             isTags = true

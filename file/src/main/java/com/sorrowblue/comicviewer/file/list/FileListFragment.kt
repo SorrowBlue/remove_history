@@ -5,7 +5,6 @@ import android.view.View
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.setPadding
 import androidx.core.view.updatePadding
 import androidx.navigation.fragment.FragmentNavigator
 import androidx.paging.PagingDataAdapter
@@ -19,16 +18,17 @@ import com.sorrowblue.comicviewer.framework.ui.fragment.PagingFragment
 import com.sorrowblue.comicviewer.framework.ui.fragment.type
 import com.sorrowblue.comicviewer.framework.ui.widget.ktx.setSpanCount
 import dagger.hilt.android.AndroidEntryPoint
-import dev.chrisbanes.insetter.Insetter
-import dev.chrisbanes.insetter.InsetterDsl
 import dev.chrisbanes.insetter.applyInsetter
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
-import logcat.logcat
 
 @AndroidEntryPoint
-abstract class FileListFragment(contentLayoutId: Int) : PagingFragment<File>(contentLayoutId) {
+abstract class FileListFragment : PagingFragment<File> {
+
+    constructor() : super()
+    constructor(contentLayoutId: Int) : super(contentLayoutId)
 
     private val toolbar: Toolbar get() = requireView().requireViewById(com.sorrowblue.comicviewer.framework.ui.R.id.toolbar)
     private val recyclerView: RecyclerView get() = requireView().requireViewById(com.sorrowblue.comicviewer.framework.ui.R.id.recycler_view)
@@ -53,8 +53,8 @@ abstract class FileListFragment(contentLayoutId: Int) : PagingFragment<File>(con
         super.onCreateAdapter(pagingDataAdapter)
         check(pagingDataAdapter is FileListAdapter)
 
-        combine(viewModel.displayFlow, viewModel.orderFlow, viewModel.sortFlow) { display, _, _ ->
-            pagingDataAdapter.setDisplay(display)
+        viewModel.displayFlow.onEach {
+            pagingDataAdapter.setDisplay(it)
         }.launchInWithLifecycle()
 
         var itemDecoration: AdaptiveSpacingItemDecoration? = null

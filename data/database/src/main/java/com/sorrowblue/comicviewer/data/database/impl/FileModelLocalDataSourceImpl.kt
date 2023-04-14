@@ -11,7 +11,8 @@ import com.sorrowblue.comicviewer.data.common.SimpleFileModel
 import com.sorrowblue.comicviewer.data.common.bookshelf.BookshelfModel
 import com.sorrowblue.comicviewer.data.common.bookshelf.BookshelfModelId
 import com.sorrowblue.comicviewer.data.common.bookshelf.FolderThumbnailOrderModel
-import com.sorrowblue.comicviewer.data.common.bookshelf.SortType
+import com.sorrowblue.comicviewer.data.common.bookshelf.SearchConditionEntity
+import com.sorrowblue.comicviewer.data.common.bookshelf.SortEntity
 import com.sorrowblue.comicviewer.data.database.ComicViewerDatabase
 import com.sorrowblue.comicviewer.data.database.FileModelRemoteMediator
 import com.sorrowblue.comicviewer.data.database.dao.FileDao
@@ -91,30 +92,29 @@ internal class FileModelLocalDataSourceImpl @Inject constructor(
         pagingConfig: PagingConfig,
         bookshelfModel: BookshelfModel,
         fileModel: FileModel,
-        sortType: () -> SortType
+        sortType: () -> SortEntity
     ): Flow<PagingData<FileModel>> {
         val remoteMediator = factory.create(bookshelfModel, fileModel)
+        val searchConditionEntity = SearchConditionEntity(
+            null,
+            SearchConditionEntity.Range.IN_FOLDER(fileModel.path),
+            SearchConditionEntity.Period.NONE
+        )
         return Pager(pagingConfig, remoteMediator = remoteMediator) {
-            dao.pagingSource(bookshelfModel.id.value, fileModel.path, sortType())
-        }.flow.map { pagingData -> pagingData.map { it.toModel() } }
+            dao.pagingSource(bookshelfModel.id.value, searchConditionEntity, sortType())
+        }.flow.map { it.map(File::toModel) }
 
     }
 
     override fun pagingSource(
         pagingConfig: PagingConfig,
         bookshelfModelId: BookshelfModelId,
-        parent: () -> String?,
-        query: () -> String,
-        sortType: () -> SortType,
+        searchConditionEntity: SearchConditionEntity,
+        sortEntity: () -> SortEntity
     ): Flow<PagingData<FileModel>> {
         return Pager(pagingConfig) {
-            dao.pagingSourceQuery(
-                bookshelfModelId.value,
-                parent(),
-                query(),
-                sortType()
-            )
-        }.flow.map { pagingData -> pagingData.map { it.toModel() } }
+            dao.pagingSource(bookshelfModelId.value, searchConditionEntity, sortEntity())
+        }.flow.map { it.map(File::toModel) }
     }
 
     override suspend fun root(id: BookshelfModelId): FileModel.Folder? {

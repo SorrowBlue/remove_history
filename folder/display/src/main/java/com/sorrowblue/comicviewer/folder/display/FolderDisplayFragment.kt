@@ -7,11 +7,14 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import com.google.android.material.sidesheet.SideSheetDialog
 import com.sorrowblue.comicviewer.domain.entity.settings.FolderDisplaySettings
+import com.sorrowblue.comicviewer.domain.usecase.paging.SortType
 import com.sorrowblue.comicviewer.folder.display.databinding.FolderDisplayFragmentBinding
-import com.sorrowblue.comicviewer.framework.ui.fragment.launchInWithDialogLifecycle
+import com.sorrowblue.comicviewer.framework.ui.flow.launchInWithDialogLifecycle
 import com.sorrowblue.jetpack.binding.viewBinding
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.runBlocking
 
 @AndroidEntryPoint
 internal class FolderDisplayFragment : DialogFragment() {
@@ -65,18 +68,19 @@ internal class FolderDisplayFragment : DialogFragment() {
 
         // Sort
         binding.sortTypeGroup.setOnCheckedStateChangeListener { _, checkedIds ->
+            val isAsc = runBlocking { viewModel.sortTypeFlow.first().isAsc }
             when (checkedIds.firstOrNull()) {
-                R.id.sort_type_date -> viewModel.update(FolderDisplaySettings.Sort.DATE)
-                R.id.sort_type_name -> viewModel.update(FolderDisplaySettings.Sort.NAME)
-                R.id.sort_type_size -> viewModel.update(FolderDisplaySettings.Sort.SIZE)
+                R.id.sort_type_date -> viewModel.update(SortType.DATE(isAsc))
+                R.id.sort_type_name -> viewModel.update(SortType.NAME(isAsc))
+                R.id.sort_type_size -> viewModel.update(SortType.SIZE(isAsc))
             }
         }
-        viewModel.sortFlow.onEach {
+        viewModel.sortTypeFlow.onEach {
             binding.sortTypeGroup.check(
                 when (it) {
-                    FolderDisplaySettings.Sort.DATE -> R.id.sort_type_date
-                    FolderDisplaySettings.Sort.NAME -> R.id.sort_type_name
-                    FolderDisplaySettings.Sort.SIZE -> R.id.sort_type_size
+                    is SortType.DATE -> R.id.sort_type_date
+                    is SortType.NAME -> R.id.sort_type_name
+                    is SortType.SIZE -> R.id.sort_type_size
                 }
             )
         }.launchInWithDialogLifecycle()
@@ -84,17 +88,12 @@ internal class FolderDisplayFragment : DialogFragment() {
         // Order
         binding.orderTypeGroup.setOnCheckedStateChangeListener { _, checkedIds ->
             when (checkedIds.firstOrNull()) {
-                R.id.order_type_asc -> viewModel.update(FolderDisplaySettings.Order.ASC)
-                R.id.order_type_desc -> viewModel.update(FolderDisplaySettings.Order.DESC)
+                R.id.order_type_asc -> viewModel.update(true)
+                R.id.order_type_desc -> viewModel.update(false)
             }
         }
-        viewModel.orderFlow.onEach {
-            binding.orderTypeGroup.check(
-                when (it) {
-                    FolderDisplaySettings.Order.ASC -> R.id.order_type_asc
-                    FolderDisplaySettings.Order.DESC -> R.id.order_type_desc
-                }
-            )
+        viewModel.isAscType.onEach {
+            binding.orderTypeGroup.check(if (it) R.id.order_type_asc else R.id.order_type_desc)
         }.launchInWithDialogLifecycle()
     }
 }

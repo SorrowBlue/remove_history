@@ -23,7 +23,6 @@ import com.google.android.material.transition.MaterialElevationScale
 import com.google.android.material.transition.MaterialFadeThrough
 import com.sorrowblue.comicviewer.framework.ui.R
 import com.sorrowblue.comicviewer.framework.ui.flow.launchInWithLifecycle
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -35,8 +34,6 @@ import kotlinx.coroutines.launch
 interface SupportPaging<T : Any> {
     val isRefreshingFlow: MutableStateFlow<Boolean>
     val isEmptyDataFlow: MutableStateFlow<Boolean>
-    var isInitialize: Boolean
-
     val pagingDataFlow: Flow<PagingData<T>>
     val transitionName: String?
 }
@@ -44,7 +41,6 @@ interface SupportPaging<T : Any> {
 abstract class PagingViewModel<T : Any> : ViewModel(), SupportPaging<T> {
     override val isRefreshingFlow = MutableStateFlow(false)
     override val isEmptyDataFlow = MutableStateFlow(false)
-    override var isInitialize = false
 }
 
 abstract class PagingAndroidViewModel<T : Any>(application: Application) :
@@ -54,40 +50,42 @@ abstract class PagingAndroidViewModel<T : Any>(application: Application) :
 
     override val isRefreshingFlow = MutableStateFlow(false)
     override val isEmptyDataFlow = MutableStateFlow(false)
-    override var isInitialize = false
 }
 
-abstract class PagingFragment<T : Any>(contentLayoutId: Int) : FrameworkFragment(contentLayoutId) {
+abstract class PagingFragment<T : Any> : FrameworkFragment {
+
+    constructor() : super()
+    constructor(contentLayoutId: Int) : super(contentLayoutId)
 
     protected abstract val viewModel: SupportPaging<T>
     private val recyclerView: RecyclerView get() = requireView().requireViewById(R.id.recycler_view)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        if (viewModel.transitionName != null) {
-//            sharedElementEnterTransition = MaterialContainerTransform().apply {
-//                fadeMode = MaterialContainerTransform.FADE_MODE_THROUGH
-//                scrimColor = MaterialColors.getColor(
-//                    requireContext(),
-//                    android.R.attr.colorBackground,
-//                    Color.TRANSPARENT
-//                )
-//                setPathMotion(MaterialArcMotion())
-//            }
-//            exitTransition = MaterialElevationScale(false).apply {
-//                excludeTarget(com.google.android.material.R.id.search_view_scrim, true)
-//            }
-//            reenterTransition = MaterialElevationScale(true).apply {
-//                excludeTarget(com.google.android.material.R.id.search_view_scrim, true)
-//            }
-//        } else {
+        if (viewModel.transitionName != null) {
+            sharedElementEnterTransition = MaterialContainerTransform().apply {
+                fadeMode = MaterialContainerTransform.FADE_MODE_THROUGH
+                scrimColor = MaterialColors.getColor(
+                    requireContext(),
+                    android.R.attr.colorBackground,
+                    Color.TRANSPARENT
+                )
+                setPathMotion(MaterialArcMotion())
+            }
+            exitTransition = MaterialElevationScale(false).apply {
+                excludeTarget(com.google.android.material.R.id.search_view_scrim, true)
+            }
+            reenterTransition = MaterialElevationScale(true).apply {
+                excludeTarget(com.google.android.material.R.id.search_view_scrim, true)
+            }
+        } else {
             enterTransition = MaterialFadeThrough().apply {
                 excludeTarget(com.google.android.material.R.id.search_view_scrim, true)
             }
             exitTransition = MaterialFadeThrough().apply {
                 excludeTarget(com.google.android.material.R.id.search_view_scrim, true)
             }
-//        }
+        }
     }
 
     override fun onCreateView(
@@ -110,15 +108,7 @@ abstract class PagingFragment<T : Any>(contentLayoutId: Int) : FrameworkFragment
         recyclerView.apply {
             adapter = pagingDataAdapter
             doOnPreDraw {
-//                if (viewModel.isInitialize) {
-//                    viewLifecycleOwner.lifecycleScope.launch {
-//                        delay(250)
-                        startPostponedEnterTransition()
-//                    }
-//                } else {
-//                    viewModel.isInitialize = true
-//                    startPostponedEnterTransition()
-//                }
+                startPostponedEnterTransition()
             }
         }
         viewLifecycleOwner.lifecycleScope.launch {

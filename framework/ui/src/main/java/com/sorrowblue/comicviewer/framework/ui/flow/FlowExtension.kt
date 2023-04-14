@@ -1,11 +1,13 @@
 package com.sorrowblue.comicviewer.framework.ui.flow
 
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.fragment.findNavController
 import androidx.paging.PagingData
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -36,3 +38,9 @@ context (ViewModel)
 fun <T> Flow<T>.mutableStateIn(init: T) = MutableStateFlow(init).also { mutable ->
     onEach { mutable.value = it }.launchIn(viewModelScope)
 }
+
+context(DialogFragment)
+fun <T> Flow<T>.launchInWithDialogLifecycle() =
+    flowWithLifecycle(findNavController().currentBackStackEntry!!.lifecycle).launchIn(
+        findNavController().currentBackStackEntry!!.lifecycleScope
+    )

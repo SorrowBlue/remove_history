@@ -42,6 +42,9 @@
             android:id="@+id/action_folder_to_folder_display"
             app:destination="@id/folder_display_navigation"
             app:launchSingleTop="true" />
+        <action
+            android:id="@+id/action_folder_to_notification_request_dialog_fragment"
+            app:destination="@id/notification_request_dialog_fragment" />
     </fragment>
     <dialog
         android:id="@+id/folder_scan_info_dialog"
@@ -57,4 +60,8 @@
     </dialog>
     <include app:graph="@navigation/book" />
     <include app:graph="@navigation/folder_display" />
+    <dialog
+        android:id="@+id/notification_request_dialog_fragment"
+        android:name="com.sorrowblue.comicviewer.folder.MaterialDialogFragment"
+        android:label="MaterialDialogFragment" />
 </navigation>

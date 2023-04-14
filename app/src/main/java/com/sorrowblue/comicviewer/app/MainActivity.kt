@@ -8,10 +8,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.splashscreen.SplashScreenViewProvider
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.asFlow
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.ui.setupWithNavController
+import androidx.work.WorkManager
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.play.core.splitcompat.SplitCompat
@@ -59,7 +61,12 @@ internal class MainActivity : AppCompatActivity(R.layout.activity_main) {
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         commonViewModel.snackbarMessage.onEach {
-            Snackbar.make(binding.root, it, Snackbar.LENGTH_SHORT).show()
+            Snackbar.make(binding.root, it, Snackbar.LENGTH_SHORT)
+                .setAnchorView(com.sorrowblue.comicviewer.framework.ui.R.id.framework_ui_fab)
+                .apply {
+                    isAnchorViewLayoutListenerEnabled = true
+                }
+                .show()
         }.launchInWithLifecycle()
 
         val navController =
@@ -77,6 +84,12 @@ internal class MainActivity : AppCompatActivity(R.layout.activity_main) {
             }
         }
         binding.bottomNavigation.setupWithNavController(navController)
+        binding.bottomNavigation.setOnItemReselectedListener {
+            logcat { navController.currentBackStack.value.lastOrNull()?.destination?.parent?.startDestDisplayName.orEmpty() }
+            if (navController.currentBackStack.value.lastOrNull()?.destination?.parent?.id != it.itemId) {
+                navController.popBackStack()
+            }
+        }
         commonViewModel.isVisibleBottomNav.onEach {
             binding.bottomNavigation.isShown(it)
         }.launchInWithLifecycle()
@@ -86,7 +99,7 @@ internal class MainActivity : AppCompatActivity(R.layout.activity_main) {
         navController.addOnDestinationChangedListener { _, destination, _ ->
             logcat { destination.hierarchy.joinToString { it.displayName.removePrefix("$packageName:") } }
             if (destination is FrameworkFragmentNavigator.Destination) {
-                binding.bottomNavigation.isShown(destination.isVisibleBottomNavigation)
+                commonViewModel.isVisibleBottomNav.tryEmit(destination.isVisibleBottomNavigation)
                 binding.frameworkUiFab.isShownWithImageResource(
                     destination.isVisibleFab,
                     destination.fabIcon,
@@ -102,6 +115,13 @@ internal class MainActivity : AppCompatActivity(R.layout.activity_main) {
                 margin(true)
             }
         }
+
+        WorkManager.getInstance(applicationContext).getWorkInfosByTagLiveData("scan").asFlow().onEach {
+            it.forEach {
+                logcat("WORK") { "id=[${it.id}], state=[${it.state}], progress=[${it.progress.keyValueMap.values.joinToString(",") { it.toString() }}]" }
+            }
+        }.launchInWithLifecycle()
+
     }
 
     private suspend fun restoreNavigation(navController: NavController) {

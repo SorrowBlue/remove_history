@@ -3,6 +3,7 @@ package com.sorrowblue.comicviewer.folder.display
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sorrowblue.comicviewer.domain.entity.settings.FolderDisplaySettings
+import com.sorrowblue.comicviewer.domain.usecase.paging.SortType
 import com.sorrowblue.comicviewer.domain.usecase.settings.ManageFolderDisplaySettingsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -27,15 +28,15 @@ internal class FolderDisplayViewModel @Inject constructor(
         }
     }
 
-    fun update(sort: FolderDisplaySettings.Sort) {
+    fun update(sortType: SortType) {
         viewModelScope.launch {
-            manageFolderDisplaySettingsUseCase.edit { it.copy(sort = sort) }
+            manageFolderDisplaySettingsUseCase.edit { it.copy(sortType = sortType) }
         }
     }
 
-    fun update(order: FolderDisplaySettings.Order) {
+    fun update(isAsc: Boolean) {
         viewModelScope.launch {
-            manageFolderDisplaySettingsUseCase.edit { it.copy(order = order) }
+            manageFolderDisplaySettingsUseCase.edit { it.copy(sortType = it.sortType.copy2(isAsc)) }
         }
     }
 
@@ -43,8 +44,8 @@ internal class FolderDisplayViewModel @Inject constructor(
         manageFolderDisplaySettingsUseCase.settings.map { it.display }.distinctUntilChanged()
     val columnSizeFlow =
         manageFolderDisplaySettingsUseCase.settings.map { it.columnSize }.distinctUntilChanged()
-    val sortFlow =
-        manageFolderDisplaySettingsUseCase.settings.map { it.sort }.distinctUntilChanged()
-    val orderFlow =
-        manageFolderDisplaySettingsUseCase.settings.map { it.order }.distinctUntilChanged()
+    val sortTypeFlow =
+        manageFolderDisplaySettingsUseCase.settings.map { it.sortType }.distinctUntilChanged()
+    val isAscType =
+        manageFolderDisplaySettingsUseCase.settings.map { it.sortType.isAsc }.distinctUntilChanged()
 }

@@ -23,7 +23,7 @@ dependencies {
     implementation(projects.settings.folder)
     implementation(projects.settings.security)
 
-    implementation("com.mikepenz:aboutlibraries:10.6.1")
+    implementation(libs.mikepenz.aboutlibraries)
 
     implementation(libs.androidx.hilt.navigation.fragment)
     kapt(libs.androidx.hilt.compiler)

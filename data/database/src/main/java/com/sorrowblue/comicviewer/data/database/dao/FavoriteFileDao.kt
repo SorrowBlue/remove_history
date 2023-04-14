@@ -9,7 +9,7 @@ import androidx.room.Query
 import androidx.room.RawQuery
 import androidx.sqlite.db.SupportSQLiteQuery
 import androidx.sqlite.db.SupportSQLiteQueryBuilder
-import com.sorrowblue.comicviewer.data.common.bookshelf.SortType
+import com.sorrowblue.comicviewer.data.common.bookshelf.SortEntity
 import com.sorrowblue.comicviewer.data.database.entity.FavoriteFile
 import com.sorrowblue.comicviewer.data.database.entity.File
 
@@ -28,7 +28,7 @@ internal interface FavoriteFileDao {
     @Query("SELECT cache_key FROM favorite_file INNER JOIN file ON favorite_file.bookshelf_id == file.bookshelf_id AND favorite_file.file_path == file.path WHERE favorite_id = :favoriteId AND file_type != 'FOLDER' AND cache_key != '' LIMIT :limit")
     suspend fun selectCacheKey(favoriteId: Int, limit: Int): List<String>
 
-    fun pagingSource(favoriteId: Int, sortType: SortType): PagingSource<Int, File> {
+    fun pagingSource(favoriteId: Int, sortType: SortEntity): PagingSource<Int, File> {
         val query =
             SupportSQLiteQueryBuilder.builder("favorite_file INNER JOIN file ON favorite_file.bookshelf_id = file.bookshelf_id AND favorite_file.file_path = file.path")
                 .apply {
@@ -38,9 +38,9 @@ internal interface FavoriteFileDao {
                         arrayOf(favoriteId)
                     )
                     when (sortType) {
-                        is SortType.NAME -> if (sortType.isAsc) "file_type_order, sort_index" else "file_type_order DESC, sort_index DESC"
-                        is SortType.DATE -> if (sortType.isAsc) "file_type_order, last_modified, sort_index" else "file_type_order DESC, last_modified DESC, sort_index DESC"
-                        is SortType.SIZE -> if (sortType.isAsc) "file_type_order, size, sort_index" else "file_type_order DESC, size DESC, sort_index DESC"
+                        is SortEntity.NAME -> if (sortType.isAsc) "file_type_order, sort_index" else "file_type_order DESC, sort_index DESC"
+                        is SortEntity.DATE -> if (sortType.isAsc) "file_type_order, last_modified, sort_index" else "file_type_order DESC, last_modified DESC, sort_index DESC"
+                        is SortEntity.SIZE -> if (sortType.isAsc) "file_type_order, size, sort_index" else "file_type_order DESC, size DESC, sort_index DESC"
                     }.let(::orderBy)
                 }.create()
         return pagingSource(query)

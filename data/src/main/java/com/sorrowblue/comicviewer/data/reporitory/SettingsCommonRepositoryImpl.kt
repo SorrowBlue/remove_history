@@ -5,6 +5,7 @@ import com.sorrowblue.comicviewer.domain.entity.settings.DisplaySettings
 import com.sorrowblue.comicviewer.domain.entity.settings.FolderDisplaySettings
 import com.sorrowblue.comicviewer.domain.entity.settings.FolderSettings
 import com.sorrowblue.comicviewer.domain.entity.settings.History
+import com.sorrowblue.comicviewer.domain.entity.settings.OneTimeFlag
 import com.sorrowblue.comicviewer.domain.entity.settings.SecuritySettings
 import com.sorrowblue.comicviewer.domain.entity.settings.Settings
 import com.sorrowblue.comicviewer.domain.entity.settings.ViewerOperationSettings
@@ -16,6 +17,12 @@ import kotlinx.coroutines.flow.Flow
 internal class SettingsCommonRepositoryImpl @Inject constructor(
     private val datastoreDataSource: DatastoreDataSource,
 ) : SettingsCommonRepository {
+
+    override val oneTimeFlag: Flow<OneTimeFlag> = datastoreDataSource.oneTimeFlag
+
+    override suspend fun updateOneTimeFlag(transform: suspend (OneTimeFlag) -> OneTimeFlag) {
+        datastoreDataSource.updateOneTimeFlag(transform)
+    }
 
     override val history: Flow<History> = datastoreDataSource.history
     override suspend fun updateHistory(transform: suspend (History) -> History) {

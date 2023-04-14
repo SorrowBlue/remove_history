@@ -6,6 +6,7 @@ import androidx.startup.Initializer
 import logcat.AndroidLogcatLogger
 import logcat.LogPriority
 import logcat.LogcatLogger
+import logcat.asLog
 import logcat.logcat
 
 class LogcatInitializer : Initializer<LogcatLogger.Companion> {
@@ -18,6 +19,8 @@ class LogcatInitializer : Initializer<LogcatLogger.Companion> {
         kotlin.runCatching {
             val initializer = Class.forName("com.sorrowblue.comicviewer.data.remote.reader.zip.SevenZipInitializer").kotlin.objectInstance
             initializer!!::class.java.getMethod("init").invoke(initializer)
+        }.onFailure {
+            logcat(LogPriority.ERROR) { it.asLog() }
         }
 
         return LogcatLogger.Companion

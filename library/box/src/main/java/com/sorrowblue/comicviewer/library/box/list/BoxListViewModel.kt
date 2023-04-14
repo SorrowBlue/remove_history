@@ -15,11 +15,13 @@ import com.sorrowblue.comicviewer.framework.ui.navigation.stateIn
 import com.sorrowblue.comicviewer.library.box.data.BoxApiRepository
 import com.sorrowblue.comicviewer.library.filelist.LibraryFileListViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 
+@OptIn(ExperimentalCoroutinesApi::class)
 internal class BoxListViewModel(
     private val repository: BoxApiRepository,
     override val savedStateHandle: SavedStateHandle

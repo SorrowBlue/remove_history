@@ -5,7 +5,7 @@ import androidx.paging.PagingData
 import androidx.paging.map
 import com.sorrowblue.comicviewer.data.common.FileModel
 import com.sorrowblue.comicviewer.data.common.bookshelf.BookshelfModelId
-import com.sorrowblue.comicviewer.data.common.bookshelf.SortType
+import com.sorrowblue.comicviewer.data.common.bookshelf.SortEntity
 import com.sorrowblue.comicviewer.data.common.favorite.FavoriteModel
 import com.sorrowblue.comicviewer.data.common.favorite.FavoriteModelId
 import com.sorrowblue.comicviewer.data.datasource.FavoriteBookLocalDataSource
@@ -46,9 +46,9 @@ internal class FavoriteFileRepositoryImpl @Inject constructor(
         ) {
             val settings = runBlocking { settingsCommonRepository.folderDisplaySettings.first() }
             when (settings.sort) {
-                FolderDisplaySettings.Sort.NAME -> SortType.NAME(settings.order == FolderDisplaySettings.Order.ASC)
-                FolderDisplaySettings.Sort.DATE -> SortType.DATE(settings.order == FolderDisplaySettings.Order.ASC)
-                FolderDisplaySettings.Sort.SIZE -> SortType.SIZE(settings.order == FolderDisplaySettings.Order.ASC)
+                FolderDisplaySettings.Sort.NAME -> SortEntity.NAME(settings.order == FolderDisplaySettings.Order.ASC)
+                FolderDisplaySettings.Sort.DATE -> SortEntity.DATE(settings.order == FolderDisplaySettings.Order.ASC)
+                FolderDisplaySettings.Sort.SIZE -> SortEntity.SIZE(settings.order == FolderDisplaySettings.Order.ASC)
             }
         }.map { it.map(FileModel::toFile) }
     }

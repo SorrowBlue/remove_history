@@ -1,16 +1,15 @@
 package com.sorrowblue.comicviewer.data.service
 
-import android.Manifest
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
-import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
+import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.sorrowblue.comicviewer.data.common.FileModel
@@ -21,14 +20,12 @@ import com.sorrowblue.comicviewer.data.datasource.BookshelfLocalDataSource
 import com.sorrowblue.comicviewer.data.datasource.FileModelLocalDataSource
 import com.sorrowblue.comicviewer.data.datasource.RemoteDataSource
 import com.sorrowblue.comicviewer.framework.notification.ChannelID
-import com.sorrowblue.comicviewer.framework.notification.createNotification
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import kotlin.random.Random
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import logcat.logcat
-
-
-private const val NOTIFICATION_ID = 1
 
 @HiltWorker
 internal class FileScanWorker @AssistedInject constructor(
@@ -39,32 +36,34 @@ internal class FileScanWorker @AssistedInject constructor(
     private val fileLocalDataSource: FileModelLocalDataSource,
 ) : CoroutineWorker(appContext, workerParams) {
 
-    private val notificationManager = NotificationManagerCompat.from(applicationContext)
     private lateinit var supportExtensions: List<String>
 
+    private val notificationID = Random.nextInt()
+
     override suspend fun getForegroundInfo(): ForegroundInfo {
-        return ForegroundInfo(NOTIFICATION_ID, createNotification(
-            applicationContext, ChannelID.SCAN, R.drawable.ic_twotone_downloading_24
-        ) {})
+        return createForegroundInfo("")
     }
 
     override suspend fun doWork(): Result {
         val request = FileScanRequest.fromWorkData(inputData) ?: return Result.failure()
-        setForeground(getForegroundInfo())
         val serverModel = bookshelfLocalDataSource.get(request.bookshelfModelId).first()!!
         val rootFileModel = fileLocalDataSource.root(serverModel.id)!!
         val fileModel = fileLocalDataSource.findBy(request.bookshelfModelId, request.path)
         val resolveImageFolder = request.resolveImageFolder
         supportExtensions = request.supportExtensions
-        logcat(tag = "FileScanWorker") { "resolveImageFolder=$resolveImageFolder" }
-        logcat(tag = "FileScanWorker") { "supportExtensions=$supportExtensions" }
-        when (request.scanTypeModel) {
-            ScanTypeModel.FULL -> factory.create(serverModel)
-                .nestedListFiles(serverModel, rootFileModel, resolveImageFolder, true)
-
-            ScanTypeModel.QUICK -> factory.create(serverModel)
-                .nestedListFiles(serverModel, fileModel!!, resolveImageFolder, false)
+        var i = 0
+        while (i < 20) {
+            delay(2000)
+            setProgress(workDataOf("count" to i))
+            setForeground(createForegroundInfo("count = ${i++}"))
         }
+//        when (request.scanTypeModel) {
+//            ScanTypeModel.FULL -> factory.create(serverModel)
+//                .nestedListFiles(serverModel, rootFileModel, resolveImageFolder, true)
+//
+//            ScanTypeModel.QUICK -> factory.create(serverModel)
+//                .nestedListFiles(serverModel, fileModel!!, resolveImageFolder, false)
+//        }
         return Result.success()
     }
 
@@ -75,31 +74,7 @@ internal class FileScanWorker @AssistedInject constructor(
         isNested: Boolean
     ) {
         setProgress(workDataOf("path" to fileModel.path))
-        if (ActivityCompat.checkSelfPermission(
-                applicationContext,
-                Manifest.permission.POST_NOTIFICATIONS
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            notificationManager.notify(NOTIFICATION_ID, createNotification(
-                applicationContext, ChannelID.SCAN, R.drawable.ic_twotone_downloading_24
-            ) {
-                val notificationIntent = Intent(
-                    Intent.ACTION_VIEW,
-                    Uri.parse("comicviewer://comicviewer.sorrowblue.com/work?uuid=${id}")
-                )
-                val pendingIntent =
-                    PendingIntent.getActivity(
-                        applicationContext,
-                        0,
-                        notificationIntent,
-                        PendingIntent.FLAG_IMMUTABLE
-                    )
-                setContentText(fileModel.path)
-                setContentIntent(pendingIntent)
-                setContentTitle("スキャン中")
-                setProgress(0, 0, true)
-            })
-        }
+        setForeground(createForegroundInfo(fileModel.path))
 
         val fileModelList = SortUtil.sortedIndex(listFiles(fileModel, resolveImageFolder) {
             SortUtil.filter(it, supportExtensions)
@@ -127,5 +102,39 @@ internal class FileScanWorker @AssistedInject constructor(
             fileModelList.filter { it is FileModel.Folder || it is FileModel.ImageFolder }
                 .forEach { nestedListFiles(bookshelfModel, it, resolveImageFolder, true) }
         }
+    }
+
+    // Creates an instance of ForegroundInfo which can be used to update the
+    // ongoing notification.
+    private fun createForegroundInfo(progress: String): ForegroundInfo {
+        val title = "スキャン中"
+        val cancel = applicationContext.getString(android.R.string.cancel)
+        // This PendingIntent can be used to cancel the worker
+        val intent = WorkManager.getInstance(applicationContext)
+            .createCancelPendingIntent(id)
+        val pendingIntent =
+            PendingIntent.getActivity(
+                applicationContext,
+                0,
+                Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse("comicviewer://comicviewer.sorrowblue.com/work?uuid=${id}")
+                ),
+                PendingIntent.FLAG_IMMUTABLE
+            )
+        val notification =
+            NotificationCompat.Builder(applicationContext, ChannelID.SCAN_BOOKSHELF.id)
+                .setContentTitle(title)
+                .setTicker(title)
+                .setContentText(progress)
+                .setContentIntent(pendingIntent)
+                .setSmallIcon(R.drawable.ic_twotone_downloading_24)
+                .setOngoing(true)
+                // Add the cancel action to the notification which can
+                // be used to cancel the worker
+                .addAction(android.R.drawable.ic_delete, cancel, intent)
+                .build()
+
+        return ForegroundInfo(notificationID, notification)
     }
 }

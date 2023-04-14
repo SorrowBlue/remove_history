@@ -1,42 +1,65 @@
 package com.sorrowblue.comicviewer.framework.notification
 
 import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
-import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.getSystemService
 import androidx.startup.Initializer
 import com.sorrowblue.comicviewer.framework.LogcatInitializer
 import logcat.LogPriority
 import logcat.logcat
 
 internal class NotificationInitializer : Initializer<Unit> {
+
     override fun create(context: Context) {
-        val notificationManager = NotificationManagerCompat.from(context)
-        val name = "スキャン状況"
-        val descriptionText = "スキャン情報を表示します。"
-        val channel = NotificationChannelCompat.Builder(ChannelID.SCAN.id,
-            NotificationManagerCompat.IMPORTANCE_LOW).setName(name).setDescription(descriptionText)
-            .build()
-        notificationManager.createNotificationChannel(channel)
+        val notificationManager = context.getSystemService<NotificationManager>()!!
         logcat(LogPriority.INFO) { "Initialize notification." }
+        val channels = listOf(
+            createNotificationChannel(
+                context,
+                ChannelID.SCAN_BOOKSHELF,
+                NotificationManager.IMPORTANCE_LOW,
+                R.string.framework_notification_name_bookshelf_scan,
+                R.string.framework_notification_description_bookshelf_scan
+            ),
+            createNotificationChannel(
+                context,
+                ChannelID.DOWNLOAD,
+                NotificationManager.IMPORTANCE_LOW,
+                R.string.framework_notification_name_download,
+                R.string.framework_notification_description_download
+            )
+        )
+        notificationManager.createNotificationChannels(channels)
     }
 
     override fun dependencies() = listOf(LogcatInitializer::class.java)
+
+    private fun createNotificationChannel(
+        context: Context,
+        channelID: ChannelID,
+        importance: Int,
+        nameRes: Int,
+        descriptionRes: Int,
+    ): NotificationChannel {
+        val name = context.getString(nameRes)
+        val channel = NotificationChannel(channelID.id, name, importance)
+        channel.description = context.getString(descriptionRes)
+        channel.importance
+        return channel
+    }
 }
 
-enum class ChannelID(val id: String) {
-    SCAN("scan"),
-    DOWNLOAD("download")
-}
-
-fun createNotification(context: Context, channelID: ChannelID, smallIcon: Int, builder: NotificationCompat.Builder.() -> Unit): Notification {
+fun createNotification(
+    context: Context,
+    channelID: ChannelID,
+    smallIcon: Int,
+    builder: NotificationCompat.Builder.() -> Unit
+): Notification {
     return NotificationCompat.Builder(context, channelID.id)
         .setSmallIcon(smallIcon)
         .apply(builder)
         .build()
-}
-
-interface NotificationContent {
-    var title: String
 }

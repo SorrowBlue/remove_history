@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="folder_message_scan">Please allow notifications to show the progress of the scan.</string>
+    <string name="folder_message_info_scan">Bookshelf scans are performed even if you do not have notification permissions.</string>
+</resources>

@@ -108,6 +108,7 @@ internal class AuthFragment : FrameworkFragment(R.layout.fragment_auth) {
                 }
 
                 override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                    findNavController().navigateUp()
                 }
 
                 override fun onAuthenticationFailed() {
@@ -124,6 +125,7 @@ internal class AuthFragment : FrameworkFragment(R.layout.fragment_auth) {
         val promptInfo = BiometricPrompt.PromptInfo.Builder()
             .setTitle("生体認証")
             .setSubtitle("確認のため、生体認証を行ってください")
+            .setNegativeButtonText("パスワードを入力")
             .setConfirmationRequired(false)
             .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_WEAK)
             .build()

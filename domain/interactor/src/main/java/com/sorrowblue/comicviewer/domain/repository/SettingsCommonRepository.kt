@@ -4,6 +4,7 @@ import com.sorrowblue.comicviewer.domain.entity.settings.DisplaySettings
 import com.sorrowblue.comicviewer.domain.entity.settings.FolderDisplaySettings
 import com.sorrowblue.comicviewer.domain.entity.settings.FolderSettings
 import com.sorrowblue.comicviewer.domain.entity.settings.History
+import com.sorrowblue.comicviewer.domain.entity.settings.OneTimeFlag
 import com.sorrowblue.comicviewer.domain.entity.settings.SecuritySettings
 import com.sorrowblue.comicviewer.domain.entity.settings.Settings
 import com.sorrowblue.comicviewer.domain.entity.settings.ViewerOperationSettings
@@ -11,6 +12,9 @@ import com.sorrowblue.comicviewer.domain.entity.settings.ViewerSettings
 import kotlinx.coroutines.flow.Flow
 
 interface SettingsCommonRepository {
+
+    val oneTimeFlag: Flow<OneTimeFlag>
+    suspend fun updateOneTimeFlag(transform: suspend (OneTimeFlag) -> OneTimeFlag)
 
     val history: Flow<History>
     suspend fun updateHistory(transform: suspend (History) -> History)

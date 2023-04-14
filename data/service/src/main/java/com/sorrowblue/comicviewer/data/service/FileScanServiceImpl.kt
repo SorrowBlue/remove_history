@@ -12,6 +12,7 @@ import com.sorrowblue.comicviewer.data.common.bookshelf.ScanTypeModel
 import com.sorrowblue.comicviewer.data.reporitory.FileScanService
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
+import logcat.logcat
 
 internal class FileScanServiceImpl @Inject constructor(
     @ApplicationContext private val context: Context
@@ -31,6 +32,7 @@ internal class FileScanServiceImpl @Inject constructor(
         val myWorkRequest = OneTimeWorkRequest.Builder(FileScanWorker::class.java)
             .setConstraints(constraints)
             .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+            .addTag("observable")
             .setInputData(
                 FileScanRequest(
                     fileModel.bookshelfModelId,
@@ -43,7 +45,7 @@ internal class FileScanServiceImpl @Inject constructor(
             .build()
         val id = myWorkRequest.id
         WorkManager.getInstance(context)
-            .enqueueUniqueWork("ExampleServiceImpl", ExistingWorkPolicy.REPLACE, myWorkRequest)
+            .enqueue(myWorkRequest)
         return id.toString()
     }
 }
