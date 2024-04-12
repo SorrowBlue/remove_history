@@ -148,6 +148,16 @@ dependencies {
     implementation(libs.google.android.billingclient.billingKtx)
 
     debugImplementation(libs.squareup.leakcanary.android)
+
+
+    implementation("com.slack.circuit:circuit-foundation:0.20.0")
+
+    api("com.slack.circuit:circuit-codegen-annotations:0.20.0")
+    ksp("com.slack.circuit:circuit-codegen:0.20.0")
+}
+
+ksp {
+    arg("circuit.codegen.mode", "hilt")
 }
 
 /*
