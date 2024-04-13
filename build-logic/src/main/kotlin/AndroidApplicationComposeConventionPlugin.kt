@@ -26,10 +26,14 @@ internal class AndroidApplicationComposeConventionPlugin : Plugin<Project> {
             dependencies {
                 implementation(libs.findLibrary("compose-destinations-core").get())
                 ksp(libs.findLibrary("compose-destinations-ksp").get())
+                implementation(libs.findLibrary("circuit-foundation").get())
+                implementation(libs.findLibrary("circuit-codegenAnnotations").get())
+                ksp(libs.findLibrary("circuit-codegen").get())
             }
 
             configure<KspExtension> {
                 arg("compose-destinations.mode", "destinations")
+                arg("circuit.codegen.mode", "hilt")
             }
         }
     }

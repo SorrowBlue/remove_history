@@ -77,8 +77,28 @@ import com.sorrowblue.comicviewer.domain.usecase.settings.ManageSecuritySettings
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ActivityComponent
 import dagger.hilt.android.components.ViewModelComponent
 
+@Module
+@InstallIn(ActivityComponent::class)
+internal interface ActivityBindsModule {
+
+    @Binds
+    fun bindPagingBookshelfFolderUseCase(
+        interactor: PagingBookshelfFolderInteractor,
+    ): PagingBookshelfFolderUseCase
+
+    @Binds
+    fun bindRemoveBookshelfUseCase(interactor: RemoveBookshelfInteractor): RemoveBookshelfUseCase
+
+    @Binds
+    fun bindGetBookshelfInfoUseCase(interactor: GetBookshelfInfoInteractor): GetBookshelfInfoUseCase
+
+    @Binds
+    fun bindScanBookshelfUseCase(interactor: ScanBookshelfInteractor): ScanBookshelfUseCase
+
+}
 @Module
 @InstallIn(ViewModelComponent::class)
 internal interface ViewModelBindsModule {

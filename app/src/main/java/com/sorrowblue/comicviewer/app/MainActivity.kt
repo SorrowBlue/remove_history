@@ -10,23 +10,22 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.splashscreen.SplashScreenViewProvider
 import com.slack.circuit.backstack.BackStack
-import com.slack.circuit.backstack.NavDecoration
 import com.slack.circuit.backstack.SaveableBackStack
 import com.slack.circuit.backstack.rememberSaveableBackStack
 import com.slack.circuit.foundation.Circuit
 import com.slack.circuit.foundation.CircuitCompositionLocals
-import com.slack.circuit.foundation.CircuitContent
 import com.slack.circuit.foundation.NavigableCircuitContent
 import com.slack.circuit.foundation.rememberCircuitNavigator
+import com.sorrowblue.comicviewer.bookshelf.BookshelfPresenter
+import com.sorrowblue.comicviewer.bookshelf.BookshelfPresenterFactory
+import com.sorrowblue.comicviewer.bookshelf.BookshelfScreen
+import com.sorrowblue.comicviewer.bookshelf.BookshelfScreenFactory
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
-import kotlinx.collections.immutable.ImmutableList
 
 @AndroidEntryPoint
 internal class MainActivity : AppCompatActivity() {
@@ -34,16 +33,10 @@ internal class MainActivity : AppCompatActivity() {
     private val viewModel: ComicViewerAppViewModel by viewModels()
 
     @Inject
-    lateinit var inboxPresenterFactory: InboxPresenterFactory
+    lateinit var bookshelfPresenterFactory: BookshelfPresenterFactory
 
     @Inject
-    lateinit var detailPresenterFactory: DetailPresenterFactory
-
-    @Inject
-    lateinit var inboxUiFactory: InboxUiFactory
-
-    @Inject
-    lateinit var detailUiFactory: EmailDetailFactory
+    lateinit var bookshelfScreenFactory: BookshelfScreenFactory
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen().apply {
@@ -68,20 +61,21 @@ internal class MainActivity : AppCompatActivity() {
 //                navController = navController
 //            )
 //        }
+
         val circuit: Circuit =
             Circuit.Builder()
-                .addPresenterFactory(inboxPresenterFactory)
-                .addUiFactory(inboxUiFactory)
-                .addPresenterFactory(detailPresenterFactory)
-                .addUiFactory(detailUiFactory)
+                .addPresenterFactory(bookshelfPresenterFactory)
+                .addUiFactory(bookshelfScreenFactory)
+//                .addPresenterFactory(detailPresenterFactory)
+//                .addUiFactory(detailUiFactory)
                 .build()
+
         setContent {
-            val backStack: BackStack<SaveableBackStack.Record> = rememberSaveableBackStack(root = InboxScreen)
+            val backStack: BackStack<SaveableBackStack.Record> = rememberSaveableBackStack(root = BookshelfScreen)
             val navigator = rememberCircuitNavigator(backStack) {
 
                 // Do something when the root screen is popped, usually exiting the app
             }
-
 
             CircuitCompositionLocals(circuit) {
                 NavigableCircuitContent(navigator = navigator, backStack = backStack)

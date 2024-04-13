@@ -24,7 +24,10 @@ import com.slack.circuit.runtime.Navigator
 import com.slack.circuit.runtime.presenter.Presenter
 import com.slack.circuit.runtime.screen.Screen
 import com.slack.circuit.runtime.ui.Ui
+import com.sorrowblue.comicviewer.domain.usecase.paging.PagingBookshelfFolderUseCase
+import dagger.hilt.android.components.ViewModelComponent
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Inject
 import kotlinx.parcelize.Parcelize
 import logcat.logcat
 
@@ -67,8 +70,8 @@ class InboxUi : Ui<InboxScreen.State> {
     }
 }
 
-@CircuitInject(InboxScreen::class, SingletonComponent::class)
-class InboxPresenter(private val navigator: Navigator) : Presenter<InboxScreen.State> {
+@CircuitInject(InboxScreen::class, ViewModelComponent::class)
+class InboxPresenter @Inject constructor(private val navigator: Navigator) : Presenter<InboxScreen.State> {
     @Composable
     override fun present(): InboxScreen.State {
         return InboxScreen.State(

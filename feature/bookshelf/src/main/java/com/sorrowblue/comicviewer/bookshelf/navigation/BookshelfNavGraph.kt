@@ -7,7 +7,6 @@ import com.ramcosta.composedestinations.spec.DestinationSpec
 import com.sorrowblue.comicviewer.bookshelf.BookshelfFolderScreenNavigator
 import com.sorrowblue.comicviewer.bookshelf.BookshelfScreenNavigator
 import com.sorrowblue.comicviewer.bookshelf.destinations.BookshelfFolderScreenDestination
-import com.sorrowblue.comicviewer.bookshelf.destinations.BookshelfScreenDestination
 import com.sorrowblue.comicviewer.domain.model.bookshelf.BookshelfId
 import com.sorrowblue.comicviewer.domain.model.bookshelf.BookshelfType
 import com.sorrowblue.comicviewer.domain.model.file.Book
@@ -22,13 +21,13 @@ import com.sorrowblue.comicviewer.framework.ui.TransitionsConfigure
 
 object BookshelfNavGraph : AnimatedNavGraphSpec {
     override val route = "bookshelf_graph"
-    override val startRoute = BookshelfScreenDestination
+    override val startRoute = TODO()
     override val showNavigation = listOf(
-        BookshelfScreenDestination,
+        TODO(),
         BookshelfFolderScreenDestination
     ).map(DestinationSpec<out Any>::route)
     override val destinationsByRoute: Map<String, DestinationSpec<*>> = listOf(
-        BookshelfScreenDestination,
+        TODO(),
         BookshelfSelectionScreenDestination,
         BookshelfEditScreenDestination,
         BookshelfFolderScreenDestination
@@ -36,7 +35,7 @@ object BookshelfNavGraph : AnimatedNavGraphSpec {
 
     override val transitions: List<TransitionsConfigure> = listOf(
         TransitionsConfigure(
-            BookshelfScreenDestination.route,
+            TODO(),
             BookshelfFolderScreenDestination.route,
             TransitionsConfigure.Type.SharedAxisX
         ),
@@ -46,12 +45,12 @@ object BookshelfNavGraph : AnimatedNavGraphSpec {
             TransitionsConfigure.Type.SharedAxisX
         ),
         TransitionsConfigure(
-            BookshelfScreenDestination.route,
+            TODO(),
             BookshelfSelectionScreenDestination.route,
             TransitionsConfigure.Type.SharedAxisY
         ),
         TransitionsConfigure(
-            BookshelfScreenDestination.route,
+            TODO(),
             BookshelfEditScreenDestination.route,
             TransitionsConfigure.Type.SharedAxisY
         ),

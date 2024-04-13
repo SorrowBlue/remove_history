@@ -25,6 +25,7 @@ koin = "3.5.6"
 compose-destinations = "1.10.2"
 junit = "1.1.5"
 roborazzi = "1.13.0"
+circuit = "0.20.0"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "android-gradle" }
@@ -165,6 +166,9 @@ koin-androidxWorkmanager = { group = "io.insert-koin", name = "koin-androidx-wor
 compose-destinations-core = { group = "io.github.raamcosta.compose-destinations", name = "core", version.ref = "compose-destinations" }
 compose-destinations-ksp = { group = "io.github.raamcosta.compose-destinations", name = "ksp", version.ref = "compose-destinations" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junit" }
+circuit-foundation = { group = "com.slack.circuit", name = "circuit-foundation", version.ref = "circuit" }
+circuit-codegenAnnotations = { group = "com.slack.circuit", name = "circuit-codegen-annotations", version.ref = "circuit" }
+circuit-codegen = { group = "com.slack.circuit", name = "circuit-codegen", version.ref = "circuit" }
 
 [bundles]
 androidx-room = ["androidx-room-runtime", "androidx-room-ktx", "androidx-room-paging"]
